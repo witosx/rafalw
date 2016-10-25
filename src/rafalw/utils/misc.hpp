@@ -1,0 +1,59 @@
+#ifndef RAFALW_UTILS_MISC_HPP_
+#define RAFALW_UTILS_MISC_HPP_
+
+#include <iterator>
+#include <functional>
+
+inline namespace rafalw {
+namespace utils {
+
+template<typename T>
+auto last_element_iterator(T&& seq)
+{
+    using std::rbegin;
+    using std::rend;
+    using std::end;
+
+    auto rit = rbegin(seq);
+
+    if (rit == rend(seq))
+        return end(seq);
+
+    return std::next(rit).base();
+}
+
+template<typename Collection, typename... Args>
+auto invoke_all(const Collection& collection, Args&&... args) -> void
+{
+    for (auto& f: collection)
+        f(std::forward<Args>(args)...);
+}
+
+template<typename T>
+constexpr auto hash(const T& o) -> std::size_t
+{
+    return std::hash<T>{}(o);
+}
+
+template<typename T>
+constexpr auto round_int_up(T value, T base) -> T
+{
+    const auto res = value / base * base;
+    return res < value ? res + base : res;
+}
+
+template<typename Int, typename T>
+constexpr auto round_thr(T vf, T thr) -> Int
+{
+    const auto vi = static_cast<Int>(vf);
+
+    if (vf - vi > thr)
+        return vi + Int{ 1 };
+
+    return vi;
+}
+
+} // namespace utils
+} // namespace rafalw
+
+#endif // RAFALW_UTILS_MISC_HPP_
