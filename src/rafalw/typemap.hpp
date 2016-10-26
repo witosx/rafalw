@@ -36,11 +36,11 @@ namespace detail {
     template<typename K, typename V>
     struct ItemKeyT<Item<K, V>>
     {
-        using type = K;
+        using Result = K;
     };
 
     template<typename I>
-    using ItemKey = typename ItemKeyT<I>::type;
+    using ItemKey = typename ItemKeyT<I>::Result;
 
 
 
@@ -50,11 +50,11 @@ namespace detail {
     template<typename K, typename V>
     struct ItemValueT<Item<K, V>>
     {
-        using type = V;
+        using Result = V;
     };
 
     template<typename I>
-    using ItemValue = typename ItemValueT<I>::type;
+    using ItemValue = typename ItemValueT<I>::Result;
 
 
 
@@ -63,10 +63,10 @@ namespace detail {
     using Items = typename M::Items;
 
     template<typename M>
-    using Keys = typelist::map<Items<M>, ItemKeyT>;
+    using Keys = typelist::map<Items<M>, ItemKey>;
 
     template<typename M>
-    using Values = typelist::map<Items<M>, ItemValueT>;
+    using Values = typelist::map<Items<M>, ItemValue>;
 
     template<typename M, typename Idx, typename Def>
     struct GetIndex;

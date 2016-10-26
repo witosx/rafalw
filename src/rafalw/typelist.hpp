@@ -1,6 +1,7 @@
 #ifndef RAFALW_TYPELIST_HPP_
 #define RAFALW_TYPELIST_HPP_
 
+#include <rafalw/templates/compose.hpp>
 #include <type_traits>
 #include <typeindex>
 #include <typeinfo>
@@ -20,6 +21,12 @@ struct Index : public std::integral_constant<std::size_t, V> {};
 
 namespace detail {
 
+    template<typename T>
+    using ResultT = typename T::Result;
+
+    template<typename T>
+    constexpr auto ResultV = T::Result;
+
     // length
 
     template<typename L>
@@ -32,7 +39,7 @@ namespace detail {
     };
 
     template<typename List>
-    static constexpr auto Length = LengthV<List>::Result;
+    static constexpr auto Length = ResultV<LengthV<List>>;
 
 
     // tail
@@ -47,7 +54,7 @@ namespace detail {
     };
 
     template<typename List>
-    using Tail = typename TailT<List>::Result;
+    using Tail = ResultT<TailT<List>>;
 
 
     // head
@@ -62,7 +69,7 @@ namespace detail {
     };
 
     template<typename List>
-    using Head = typename HeadT<List>::Result;
+    using Head = ResultT<HeadT<List>>;
 
 
     // append
@@ -77,7 +84,7 @@ namespace detail {
     };
 
     template<typename List, typename Element>
-    using Append = typename AppendT<List, Element>::Result;
+    using Append = ResultT<AppendT<List, Element>>;
 
 
     // prepend
@@ -92,7 +99,7 @@ namespace detail {
     };
 
     template<typename List, typename Element>
-    using Prepend = typename PrependT<List, Element>::Result;
+    using Prepend = ResultT<PrependT<List, Element>>;
 
 
     // concat
@@ -107,7 +114,7 @@ namespace detail {
     };
 
     template<typename L1, typename L2>
-    using Concat = typename ConcatT<L1, L2>::Result;
+    using Concat = ResultT<ConcatT<L1, L2>>;
 
 
     // reverse
@@ -115,7 +122,7 @@ namespace detail {
     template<typename L>
     struct ReverseT
     {
-        using Result = Append<typename ReverseT<Tail<L>>::Result, Head<L>>;
+        using Result = Append<ResultT<ReverseT<Tail<L>>>, Head<L>>;
     };
 
     template<>
@@ -125,7 +132,7 @@ namespace detail {
     };
 
     template<typename List>
-    using Reverse = typename ReverseT<List>::Result;
+    using Reverse = ResultT<ReverseT<List>>;
 
 
     // count
@@ -143,7 +150,7 @@ namespace detail {
     };
 
     template<typename L, typename E>
-    static constexpr auto Count = CountT<L, E>::Result;
+    static constexpr auto Count = ResultV<CountT<L, E>>;
 
 
     // find
@@ -151,7 +158,7 @@ namespace detail {
     template<typename L, typename Element, std::size_t I = 0>
     struct FindT
     {
-        using Result = typename FindT<Tail<L>, Element, I + 1>::Result;
+        using Result = ResultT<FindT<Tail<L>, Element, I + 1>>;
     };
 
     template<typename... Elements, typename Element, std::size_t I>
@@ -181,7 +188,7 @@ namespace detail {
     template<typename L, std::size_t N>
     struct DropT
     {
-        using Result = typename DropT<Tail<L>, N - 1>::Result;
+        using Result = ResultT<DropT<Tail<L>, N - 1>>;
     };
 
     template<typename L>
@@ -191,7 +198,7 @@ namespace detail {
     };
 
     template<typename List, std::size_t COUNT>
-    using Drop = typename DropT<List, COUNT>::Result;
+    using Drop = ResultT<DropT<List, COUNT>>;
 
 
     // take
@@ -217,7 +224,7 @@ namespace detail {
     template<typename L, typename Res = empty>
     struct UniqueT
     {
-        using Result = typename UniqueT<Tail<L>, std::conditional_t<Contains<Res, Head<L>>, Res, Append<Res, Head<L>>>>::Result;
+        using Result = ResultT<UniqueT<Tail<L>, std::conditional_t<Contains<Res, Head<L>>, Res, Append<Res, Head<L>>>>>;
     };
 
     template<typename Res>
@@ -227,25 +234,25 @@ namespace detail {
     };
 
     template<typename List>
-    using Unique = typename UniqueT<List>::Result;
+    using Unique = ResultT<UniqueT<List>>;
 
 
     // map
 
-    template<typename L, template<typename> class F>
+    template<typename L, template<typename> class... F>
     struct MapT
     {
-        using Result = Prepend<typename MapT<Tail<L>, F>::Result, typename F<Head<L>>::type>;
+        using Result = Prepend<ResultT<MapT<Tail<L>, F...>>, templates::compose<Head<L>, F...>>;
     };
 
-    template<template<typename> class F>
-    struct MapT<empty, F>
+    template<template<typename> class... F>
+    struct MapT<empty, F...>
     {
         using Result = empty;
     };
 
-    template<typename L, template<typename> class F>
-    using Map = typename MapT<L, F>::Result;
+    template<typename L, template<typename> class... F>
+    using Map = ResultT<MapT<L, F...>>;
 
 
 } // namespace detail
@@ -298,8 +305,8 @@ using take = detail::Take<List, COUNT>;
 template<typename L, std::size_t INDEX>
 using erase = detail::Erase<L, INDEX>;
 
-template<typename L, template<typename> class F>
-using map = detail::Map<L, F>;
+template<typename L, template<typename> class... F>
+using map = detail::Map<L, F...>;
 
 } // namespace typelist
 } // namespace rafalw
