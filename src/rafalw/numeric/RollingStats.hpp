@@ -1,5 +1,5 @@
-#ifndef RAFALW_NUMERIC_ROLLINGVARIANCE_HPP_
-#define RAFALW_NUMERIC_ROLLINGVARIANCE_HPP_
+#ifndef RAFALW_NUMERIC_ROLLINGSTATS_HPP_
+#define RAFALW_NUMERIC_ROLLINGSTATS_HPP_
 
 #include <rafalw/utils/assert.hpp>
 #include <deque>
@@ -9,7 +9,7 @@ inline namespace rafalw {
 namespace numeric {
 
 template<typename _Value>
-class RollingVariance
+class RollingStats
 {
 public:
     using Value = _Value;
@@ -31,21 +31,26 @@ public:
         m_buffer.pop_front();
     }
 
-    auto windowSize() const -> std::size_t
+    auto size() const -> std::size_t
     {
         return m_buffer.size();
     }
 
+    auto empty() const -> std::size_t
+    {
+        return m_buffer.empty();
+    }
+
     auto mean() const -> Value
     {
-        rafalw_utils_assert(windowSize() > 0);
-        return m_sum1 / windowSize();
+        rafalw_utils_assert(size() > 0);
+        return m_sum1 / size();
     }
 
     auto variance() const -> Value2
     {
-        rafalw_utils_assert(windowSize() > 1);
-        auto n = windowSize();
+        rafalw_utils_assert(size() > 1);
+        auto n = size();
         auto m1 = mean();
         auto m2 = m1 * m1;
         return m_sum2 / (n - 1) - 2 * m1 * m_sum1 / (n - 1) + n * m2 / (n - 1);
@@ -61,4 +66,4 @@ private:
 } // namespace numeric
 } // namespace rafalw
 
-#endif // RAFALW_NUMERIC_ROLLINGVARIANCE_HPP_
+#endif // RAFALW_NUMERIC_ROLLINGSTATS_HPP_
