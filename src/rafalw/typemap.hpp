@@ -28,6 +28,8 @@ using empty = create<>;
 
 namespace detail {
 
+    struct NoDefault {};
+
     template<typename I>
     struct ItemKeyT;
 
@@ -91,15 +93,21 @@ namespace detail {
     template<typename M, typename K, typename Def>
     using GetDefault = typename GetDefaultT<M, K, Def>::Result;
 
-    template<typename M, typename K>
+    template<typename M, typename K, typename D>
     struct GetT
+    {
+        using Result = GetDefault<M, K, D>;
+    };
+
+    template<typename M, typename K>
+    struct GetT<M, K, NoDefault>
     {
         using Result = GetDefault<M, K, NotFound>;
         static_assert(!std::is_same<Result, NotFound>::value, "key not found");
     };
 
-    template<typename M, typename K>
-    using Get = typename GetT<M, K>::Result;
+    template<typename M, typename K, typename D>
+    using Get = typename GetT<M, K, D>::Result;
 
 
     template<typename M, typename Idx, typename K, typename V>
@@ -149,11 +157,14 @@ using values = detail::Values<M>;
 template<typename M, typename K, typename V>
 using set = detail::Set<M, K, V>;
 
-template<typename M, typename K>
-using get = detail::Get<M, K>;
+template<typename M, typename K, typename D = detail::NoDefault>
+using get = detail::Get<M, K, D>;
 
-template<typename M, typename K, typename Def>
-using get_or = detail::GetDefault<M, K, Def>;
+template<typename M>
+constexpr auto size = typelist::length<items<M>>;
+
+template<typename M>
+constexpr auto isempty = typelist::isempty<items<M>>;
 
 template<typename M, typename K>
 constexpr auto contains = detail::Contains<M, K>;
