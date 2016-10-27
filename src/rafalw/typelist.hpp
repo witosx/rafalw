@@ -254,6 +254,24 @@ namespace detail {
     template<typename L, template<typename> class... F>
     using Map = ResultT<MapT<L, F...>>;
 
+    template<typename L, template<typename, typename> class F>
+    struct AccumulateT
+    {
+        using Result = F<Head<L>, ResultT<AccumulateT<Tail<L>, F>>>;
+    };
+
+    template<typename E, template<typename, typename> class F>
+    struct AccumulateT<List<E>, F>
+    {
+        using Result = E;
+    };
+
+    template<template<typename, typename> class F>
+    struct AccumulateT<empty, F>
+    {};
+
+    template<typename L, template<typename, typename> class F>
+    using Accumulate = ResultT<AccumulateT<L, F>>;
 
 } // namespace detail
 
@@ -307,6 +325,9 @@ using erase = detail::Erase<L, INDEX>;
 
 template<typename L, template<typename> class... F>
 using map = detail::Map<L, F...>;
+
+template<typename L, template<typename, typename> class F>
+using accumulate = detail::Accumulate<L, F>;
 
 } // namespace typelist
 } // namespace rafalw
