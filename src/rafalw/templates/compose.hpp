@@ -6,18 +6,21 @@ namespace templates {
 
 namespace detail {
 
+    template<template<typename> class... Args>
+    struct Compose;
+
     template<template<typename> class Arg, template<typename> class... Args>
-    struct Compose
+    struct Compose<Arg, Args...>
     {
         template<typename T>
-        using Result = Arg<typename Compose<Args...>::template Result<T>>;
+        using Result = typename Compose<Args...>::template Result<Arg<T>>;
     };
 
-    template<template<typename> class Arg>
-    struct Compose<Arg>
+    template<>
+    struct Compose<>
     {
         template<typename T>
-        using Result = Arg<T>;
+        using Result = T;
     };
 
 } // namespace detail
