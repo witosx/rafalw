@@ -255,9 +255,12 @@ namespace detail {
     using Map = ResultT<MapT<L, F...>>;
 
     template<typename L, template<typename, typename> class F>
-    struct AccumulateT
+    struct AccumulateT;
+
+    template<typename E1, typename E2, typename... E, template<typename, typename> class F>
+    struct AccumulateT<List<E1, E2, E...>, F>
     {
-        using Result = F<Head<L>, ResultT<AccumulateT<Tail<L>, F>>>;
+        using Result = ResultT<AccumulateT<List<F<E1, E2>, E...>, F>>;
     };
 
     template<typename E, template<typename, typename> class F>
