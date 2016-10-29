@@ -15,18 +15,31 @@ struct Item
     using Value = V;
 };
 
-template<typename _Items>
-struct Map
+template<typename... Items>
+struct Map;
+
+template<typename... Keys, typename... Values>
+struct Map<Item<Keys, Values>...>
 {
-    using Items = _Items;
+    using Items = typelist::List<Item<Keys, Values>...>;
 };
 
-template<typename... Items>
-using create = Map<typelist::List<Items...>>;
-
-using empty = create<>;
+using empty = Map<>;
 
 namespace detail {
+
+    template<typename L>
+    struct FromListT;
+
+    template<typename... Items>
+    struct FromListT<typelist::List<Items...>>
+    {
+        using Result = Map<Items...>;
+    };
+
+    template<typename L>
+    using FromList = typename FromListT<L>::Result;
+
 
     struct NoDefault {};
 
@@ -116,7 +129,7 @@ namespace detail {
     template<typename M, typename K, typename V>
     struct SetIndex<M, typelist::NotFound, K, V>
     {
-        using Result = Map<typelist::append<Items<M>, Item<K, V>>>;
+        using Result = FromList<typelist::append<Items<M>, Item<K, V>>>;
     };
 
     template<typename M, typename K, typename V, std::size_t I>
@@ -126,7 +139,7 @@ namespace detail {
         using L1 = typelist::take<L, I>;
         using L2 = typelist::drop<L, I + 1>;
         using L3 = typelist::concat<typelist::append<L1, Item<K, V>>, L2>;
-        using Result = Map<L3>;
+        using Result = FromList<L3>;
     };
 
 
@@ -144,6 +157,9 @@ namespace detail {
     template<typename M, typename K>
     constexpr auto Contains = typelist::contains<Keys<M>, K>;
 }
+
+template<typename L>
+using from_list = detail::FromList<L>;
 
 template<typename M>
 using items = detail::Items<M>;
