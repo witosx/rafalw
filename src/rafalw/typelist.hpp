@@ -21,6 +21,35 @@ struct Index : public std::integral_constant<std::size_t, V> {};
 
 namespace detail {
 
+    template<bool... Args>
+    struct Any;
+
+    template<>
+    struct Any<> : public std::integral_constant<bool, false> {};
+
+    template<bool Arg, bool... Args>
+    struct Any<Arg, Args...> : public std::integral_constant<bool, Arg || Any<Args...>::value> {};
+
+    template<bool... Args>
+    constexpr auto any = Any<Args...>::value;
+
+    template<typename B>
+    struct Negate : public std::integral_constant<bool, !B::value> {};
+
+    template<template<typename...> class F>
+    struct Not
+    {
+        template<typename... T>
+        using Result = Negate<F<T...>>;
+    };
+
+    template<template<typename...> class T, typename Arg>
+    struct Bind
+    {
+        template<typename... Args>
+        using Result = T<Arg, Args...>;
+    };
+
     template<typename T>
     using result = typename T::Result;
 
@@ -45,6 +74,11 @@ namespace detail {
 
     template<typename List>
     constexpr auto length = Length<List>::value;
+
+    // isempty
+
+    template<typename L>
+    constexpr auto isempty = length<L> == 0;
 
     // tail
 
@@ -182,20 +216,6 @@ namespace detail {
         using Result = empty;
     };
 
-    // count
-
-    template<typename L, typename Element>
-    struct Count;
-
-    template<typename L, typename E>
-    static constexpr auto count = Count<L, E>::value;
-
-    template<typename L, typename E>
-    struct Count : public std::integral_constant<std::size_t, std::is_same<E, head<L>>::value + count<tail<L>, E>> {};
-
-    template<typename E>
-    struct Count<empty, E> : public std::integral_constant<std::size_t, 0> {};
-
     // find
 
     template<typename L, typename Element, std::size_t I>
@@ -250,25 +270,13 @@ namespace detail {
 
     // remove
 
-    template<typename B>
-    struct Negate : public std::integral_constant<bool, !B::value> {};
-
-    template<template<typename...> class F>
-    struct Not
-    {
-        template<typename... T>
-        using Result = Negate<F<T...>>;
-    };
-
-    template<template<typename...> class T, typename Arg>
-    struct Bind
-    {
-        template<typename... Args>
-        using Result = T<Arg, Args...>;
-    };
-
     template<typename L, typename E>
     using remove = filter<L, Bind<Not<std::is_same>::template Result, E>::template Result>;
+
+    // count
+
+    template<typename L, typename E>
+    static constexpr auto count = length<filter<L, Bind<std::is_same, E>::template Result>>;
 
     // unique
 
@@ -315,23 +323,35 @@ namespace detail {
     template<typename L, std::size_t COUNT>
     using take = reverse<drop<reverse<L>, length<L> - COUNT>>;
 
-
     // element
 
     template<typename L, std::size_t N>
     using element = head<drop<L, N>>;
-
 
     // erase
 
     template<typename L, std::size_t INDEX>
     using erase = concat<take<L, INDEX>, drop<L, INDEX + 1>>;
 
+    // zip
 
+    template<bool empty, typename... Ls>
+    struct Zip;
 
+    template<typename... Ls>
+    using zip = result<Zip<any<isempty<Ls>...>, Ls...>>;
 
+    template<typename... Ls>
+    struct Zip<true, Ls...>
+    {
+        using Result = empty;
+    };
 
-
+    template<typename... Ls>
+    struct Zip<false, Ls...>
+    {
+        using Result = concat<List<List<head<Ls>...>>, zip<tail<Ls>...>>;
+    };
 
 } // namespace detail
 
@@ -342,7 +362,7 @@ template<typename L>
 static constexpr auto length = detail::length<L>;
 
 template<typename L>
-static constexpr auto isempty = length<L> == 0;
+static constexpr auto isempty = detail::isempty<L>;
 
 template<typename L, typename E>
 static constexpr auto contains = detail::contains<L, E>;
@@ -397,6 +417,9 @@ using map = detail::map<L, F...>;
 
 template<typename L, template<typename, typename> class F>
 using reduce = detail::reduce<L, F>;
+
+template<typename... Ls>
+using zip = detail::zip<Ls...>;
 
 } // namespace typelist
 } // namespace rafalw
