@@ -326,7 +326,7 @@ namespace detail {
     // element
 
     template<typename L, std::size_t N>
-    using element = head<drop<L, N>>;
+    using get = head<drop<L, N>>;
 
     // erase
 
@@ -371,7 +371,7 @@ template<typename L, typename E>
 static constexpr auto count = detail::count<L, E>;
 
 template<typename L, std::size_t I>
-using element = detail::element<L, I>;
+using get = detail::get<L, I>;
 
 template<typename L>
 using head = detail::head<L>;
