@@ -93,7 +93,7 @@ namespace detail {
     template<typename M, typename Def, std::size_t I>
     struct GetIndex<M, typelist::Index<I>, Def>
     {
-        using Result = ItemValue<typelist::element<Items<M>, I>>;
+        using Result = ItemValue<typelist::get<Items<M>, I>>;
     };
 
     template<typename M, typename K, typename Def>
