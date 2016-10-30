@@ -22,315 +22,381 @@ struct Index : public std::integral_constant<std::size_t, V> {};
 namespace detail {
 
     template<typename T>
-    using ResultT = typename T::Result;
+    using result = typename T::Result;
+
+    // isinstance
 
     template<typename T>
-    constexpr auto ResultV = T::Result;
+    struct IsInstance : public std::false_type {};
+
+    template<typename... E>
+    struct IsInstance<List<E...>> : public std::true_type {};
+
+    template<typename T>
+    constexpr auto isinstance = IsInstance<T>::value;
 
     // length
 
     template<typename L>
-    struct LengthV;
+    struct Length;
 
     template<typename... Elements>
-    struct LengthV<List<Elements...>>
-    {
-        static constexpr auto Result = sizeof...(Elements);
-    };
+    struct Length<List<Elements...>> : public std::integral_constant<std::size_t, sizeof...(Elements)> {};
 
     template<typename List>
-    static constexpr auto Length = ResultV<LengthV<List>>;
-
+    constexpr auto length = Length<List>::value;
 
     // tail
 
     template<typename L>
-    struct TailT;
+    struct Tail;
 
     template<typename Element0, typename... Elements>
-    struct TailT<List<Element0, Elements...>>
+    struct Tail<List<Element0, Elements...>>
     {
         using Result = List<Elements...>;
     };
 
     template<typename List>
-    using Tail = ResultT<TailT<List>>;
+    using tail = result<Tail<List>>;
 
 
     // head
 
     template<typename L>
-    struct HeadT;
+    struct Head;
 
     template<typename Element0, typename... Elements>
-    struct HeadT<List<Element0, Elements...>>
+    struct Head<List<Element0, Elements...>>
     {
         using Result = Element0;
     };
 
     template<typename List>
-    using Head = ResultT<HeadT<List>>;
+    using head = result<Head<List>>;
 
 
     // append
 
     template<typename L, typename Element>
-    struct AppendT;
+    struct Append;
 
     template<typename... Elements, typename Element>
-    struct AppendT<List<Elements...>, Element>
+    struct Append<List<Elements...>, Element>
     {
         using Result = List<Elements..., Element>;
     };
 
     template<typename List, typename Element>
-    using Append = ResultT<AppendT<List, Element>>;
+    using append = result<Append<List, Element>>;
 
 
     // prepend
 
     template<typename L, typename Element>
-    struct PrependT;
+    struct Prepend;
 
     template<typename... Elements, typename Element>
-    struct PrependT<List<Elements...>, Element>
+    struct Prepend<List<Elements...>, Element>
     {
         using Result = List<Element, Elements...>;
     };
 
     template<typename List, typename Element>
-    using Prepend = ResultT<PrependT<List, Element>>;
+    using prepend = result<Prepend<List, Element>>;
 
+    // map
+
+    template<typename L, template<typename> class... F>
+    struct Map;
+
+    template<typename L, template<typename> class... F>
+    using map = result<Map<L, F...>>;
+
+    template<typename L, template<typename> class... F>
+    struct Map
+    {
+        using Result = prepend<map<tail<L>, F...>, templates::compose<head<L>, F...>>;
+    };
+
+    template<template<typename> class... F>
+    struct Map<empty, F...>
+    {
+        using Result = empty;
+    };
+
+    // reduce
+
+    template<typename L, template<typename, typename> class F>
+    struct Reduce;
+
+    template<typename L, template<typename, typename> class F>
+    using reduce = result<Reduce<L, F>>;
+
+    template<typename E1, typename E2, typename... E, template<typename, typename> class F>
+    struct Reduce<List<E1, E2, E...>, F>
+    {
+        using Result = reduce<List<F<E1, E2>, E...>, F>;
+    };
+
+    template<typename E, template<typename, typename> class F>
+    struct Reduce<List<E>, F>
+    {
+        using Result = E;
+    };
 
     // concat
 
     template<typename L1, typename L2>
-    struct ConcatT;
+    struct Concat2;
 
     template<typename... Elements1, typename... Elements2>
-    struct ConcatT<List<Elements1...>, List<Elements2...>>
+    struct Concat2<List<Elements1...>, List<Elements2...>>
     {
         using Result = List<Elements1..., Elements2...>;
     };
 
     template<typename L1, typename L2>
-    using Concat = ResultT<ConcatT<L1, L2>>;
+    using concat2 = result<Concat2<L1, L2>>;
 
+    template<typename... L>
+    using concat = reduce<List<empty, L...>, concat2>;
 
     // reverse
 
     template<typename L>
-    struct ReverseT
+    struct Reverse;
+
+    template<typename List>
+    using reverse = result<Reverse<List>>;
+
+    template<typename L>
+    struct Reverse
     {
-        using Result = Append<ResultT<ReverseT<Tail<L>>>, Head<L>>;
+        using Result = append<reverse<tail<L>>, head<L>>;
     };
 
     template<>
-    struct ReverseT<empty>
+    struct Reverse<empty>
     {
         using Result = empty;
     };
 
-    template<typename List>
-    using Reverse = ResultT<ReverseT<List>>;
-
-
     // count
 
     template<typename L, typename Element>
-    struct CountT
-    {
-        static constexpr auto Result = std::is_same<Element, Head<L>>::value + CountT<Tail<L>, Element>::Result;
-    };
-
-    template<typename E>
-    struct CountT<empty, E>
-    {
-        static constexpr auto Result = std::size_t{ 0 };
-    };
+    struct Count;
 
     template<typename L, typename E>
-    static constexpr auto Count = ResultV<CountT<L, E>>;
+    static constexpr auto count = Count<L, E>::value;
 
+    template<typename L, typename E>
+    struct Count : public std::integral_constant<std::size_t, std::is_same<E, head<L>>::value + count<tail<L>, E>> {};
+
+    template<typename E>
+    struct Count<empty, E> : public std::integral_constant<std::size_t, 0> {};
 
     // find
 
-    template<typename L, typename Element, std::size_t I = 0>
-    struct FindT
+    template<typename L, typename Element, std::size_t I>
+    struct Find;
+
+    template<typename List, typename Element, std::size_t I = 0>
+    using find = result<Find<List, Element, I>>;
+
+    template<typename L, typename Element, std::size_t I>
+    struct Find
     {
-        using Result = ResultT<FindT<Tail<L>, Element, I + 1>>;
+        using Result = find<tail<L>, Element, I + 1>;
     };
 
     template<typename... Elements, typename Element, std::size_t I>
-    struct FindT<List<Element, Elements...>, Element, I>
+    struct Find<List<Element, Elements...>, Element, I>
     {
         using Result = Index<I>;
     };
 
     template<typename Element, std::size_t I>
-    struct FindT<empty, Element, I>
+    struct Find<empty, Element, I>
     {
         using Result = NotFound;
     };
 
-    template<typename List, typename Element>
-    using Find = typename FindT<List, Element>::Result;
-
-
     // contains
 
     template<typename List, typename Element>
-    constexpr auto Contains = !std::is_same<Find<List, Element>, NotFound>::value;
+    constexpr auto contains = !std::is_same<find<List, Element>, NotFound>::value;
 
+    // filter
+
+    template<typename L, template<typename...> class F>
+    struct Filter;
+
+    template<typename L, template<typename...> class F>
+    using filter = result<Filter<L, F>>;
+
+    template<typename L, template<typename...> class F>
+    struct Filter
+    {
+        using H = head<L>;
+        using Result = concat<std::conditional_t<F<H>::value, List<H>, empty>, filter<tail<L>, F>>;
+    };
+
+    template<template<typename...> class F>
+    struct Filter<empty, F>
+    {
+        using Result = empty;
+    };
+
+    // remove
+
+    template<typename B>
+    struct Negate : public std::integral_constant<bool, !B::value> {};
+
+    template<template<typename...> class F>
+    struct Not
+    {
+        template<typename... T>
+        using Result = Negate<F<T...>>;
+    };
+
+    template<template<typename...> class T, typename Arg>
+    struct Bind
+    {
+        template<typename... Args>
+        using Result = T<Arg, Args...>;
+    };
+
+    template<typename L, typename E>
+    using remove = filter<L, Bind<Not<std::is_same>::template Result, E>::template Result>;
+
+    // unique
+
+    template<typename L>
+    struct Unique;
+
+    template<typename L>
+    using unique = result<Unique<L>>;
+
+    template<typename L>
+    struct Unique
+    {
+        using Result = prepend<unique<remove<L, head<L>>>, head<L>>;
+    };
+
+    template<>
+    struct Unique<empty>
+    {
+        using Result = empty;
+    };
 
     // drop
 
     template<typename L, std::size_t N>
-    struct DropT
+    struct Drop;
+
+    template<typename List, std::size_t COUNT>
+    using drop = result<Drop<List, COUNT>>;
+
+    template<typename L, std::size_t N>
+    struct Drop
     {
-        using Result = ResultT<DropT<Tail<L>, N - 1>>;
+        using Result = drop<tail<L>, N - 1>;
     };
 
     template<typename L>
-    struct DropT<L, 0>
+    struct Drop<L, 0>
     {
         using Result = L;
     };
 
-    template<typename List, std::size_t COUNT>
-    using Drop = ResultT<DropT<List, COUNT>>;
-
-
     // take
 
     template<typename L, std::size_t COUNT>
-    using Take = Reverse<Drop<Reverse<L>, Length<L> - COUNT>>;
+    using take = reverse<drop<reverse<L>, length<L> - COUNT>>;
 
 
     // element
 
     template<typename L, std::size_t N>
-    using Element = Head<Drop<L, N>>;
+    using element = head<drop<L, N>>;
 
 
     // erase
 
     template<typename L, std::size_t INDEX>
-    using Erase = Concat<Take<L, INDEX>, Drop<L, INDEX + 1>>;
+    using erase = concat<take<L, INDEX>, drop<L, INDEX + 1>>;
 
 
-    // unique
-
-    template<typename L, typename Res = empty>
-    struct UniqueT
-    {
-        using Result = ResultT<UniqueT<Tail<L>, std::conditional_t<Contains<Res, Head<L>>, Res, Append<Res, Head<L>>>>>;
-    };
-
-    template<typename Res>
-    struct UniqueT<empty, Res>
-    {
-        using Result = Res;
-    };
-
-    template<typename List>
-    using Unique = ResultT<UniqueT<List>>;
 
 
-    // map
 
-    template<typename L, template<typename> class... F>
-    struct MapT
-    {
-        using Result = Prepend<ResultT<MapT<Tail<L>, F...>>, templates::compose<Head<L>, F...>>;
-    };
 
-    template<template<typename> class... F>
-    struct MapT<empty, F...>
-    {
-        using Result = empty;
-    };
-
-    template<typename L, template<typename> class... F>
-    using Map = ResultT<MapT<L, F...>>;
-
-    template<typename L, template<typename, typename> class F>
-    struct AccumulateT;
-
-    template<typename E1, typename E2, typename... E, template<typename, typename> class F>
-    struct AccumulateT<List<E1, E2, E...>, F>
-    {
-        using Result = ResultT<AccumulateT<List<F<E1, E2>, E...>, F>>;
-    };
-
-    template<typename E, template<typename, typename> class F>
-    struct AccumulateT<List<E>, F>
-    {
-        using Result = E;
-    };
-
-    template<template<typename, typename> class F>
-    struct AccumulateT<empty, F>
-    {};
-
-    template<typename L, template<typename, typename> class F>
-    using Accumulate = ResultT<AccumulateT<L, F>>;
 
 } // namespace detail
 
-template<typename List>
-static constexpr auto length = detail::Length<List>;
+template<typename T>
+static constexpr auto isinstance = detail::isinstance<T>;
 
-template<typename List>
-static constexpr auto isempty = length<List> == 0;
+template<typename L>
+static constexpr auto length = detail::length<L>;
 
-template<typename List, typename Element>
-static constexpr auto contains = detail::Contains<List, Element>;
+template<typename L>
+static constexpr auto isempty = length<L> == 0;
 
-template<typename List, typename Element>
-static constexpr auto count = detail::Count<List, Element>;
+template<typename L, typename E>
+static constexpr auto contains = detail::contains<L, E>;
 
-template<typename List, std::size_t INDEX>
-using element = detail::Element<List, INDEX>;
+template<typename L, typename E>
+static constexpr auto count = detail::count<L, E>;
 
-template<typename List>
-using head = detail::Head<List>;
+template<typename L, std::size_t I>
+using element = detail::element<L, I>;
 
-template<typename List>
-using tail = detail::Tail<List>;
+template<typename L>
+using head = detail::head<L>;
 
-template<typename List, typename Element>
-using append = detail::Append<List, Element>;
+template<typename L>
+using tail = detail::tail<L>;
 
-template<typename List, typename Element>
-using prepend = detail::Prepend<List, Element>;
+template<typename L, typename E>
+using append = detail::append<L, E>;
 
-template<typename List>
-using reverse = detail::Reverse<List>;
+template<typename L, typename E>
+using prepend = detail::prepend<L, E>;
 
-template<typename List1, typename List2>
-using concat = detail::Concat<List1, List2>;
+template<typename L>
+using reverse = detail::reverse<L>;
 
-template<typename List, typename Element>
-using find = detail::Find<List, Element>;
+template<typename... L>
+using concat = detail::concat<L...>;
 
-template<typename List>
-using unique = detail::Unique<List>;
+template<typename L, typename E>
+using find = detail::find<L, E>;
 
-template<typename List, std::size_t COUNT>
-using drop = detail::Drop<List, COUNT>;
+template<typename L>
+using unique = detail::unique<L>;
 
-template<typename List, std::size_t COUNT>
-using take = detail::Take<List, COUNT>;
+template<typename L, std::size_t N>
+using drop = detail::drop<L, N>;
 
-template<typename L, std::size_t INDEX>
-using erase = detail::Erase<L, INDEX>;
+template<typename L, std::size_t N>
+using take = detail::take<L, N>;
+
+template<typename L, std::size_t Idx>
+using erase = detail::erase<L, Idx>;
+
+template<typename L, typename E>
+using remove = detail::remove<L, E>;
+
+template<typename L, template<typename> class F>
+using filter = detail::filter<L, F>;
 
 template<typename L, template<typename> class... F>
-using map = detail::Map<L, F...>;
+using map = detail::map<L, F...>;
 
 template<typename L, template<typename, typename> class F>
-using accumulate = detail::Accumulate<L, F>;
+using reduce = detail::reduce<L, F>;
 
 } // namespace typelist
 } // namespace rafalw
