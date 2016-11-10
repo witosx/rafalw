@@ -17,8 +17,12 @@ template<typename T>
 auto str(const T& obj) -> std::string
 {
     using std::to_string;
-
     return to_string(obj);
+}
+
+inline auto str(const std::string& obj) -> const std::string&
+{
+    return obj;
 }
 
 template<typename CharT, typename... Args>
