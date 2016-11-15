@@ -4,6 +4,7 @@
 #include <rafalw/utils/assert.hpp>
 #include <rafalw/utils/static.hpp>
 #include <cmath>
+#include <cstdint>
 
 inline namespace rafalw {
 namespace math {
@@ -43,6 +44,24 @@ constexpr auto int_pow2(int power) -> T
     rafalw_utils_assert(power >= 0);
     rafalw_utils_assert(power < static_cast<int>(sizeof(T)) * 8 - 1);
     return T{ 1 } << power;
+}
+
+template<typename T1, typename T2>
+constexpr auto round_dn(T1 v, T2 r) -> T1
+{
+    using std::floor;
+    return static_cast<T1>(floor(v / r) * r);
+}
+
+template<typename T1, typename T2>
+constexpr auto round_up(T1 v, T2 r) -> T1
+{
+    auto res = round_dn(v, r);
+
+    if (res < v)
+        res += r;
+
+    return res;
 }
 
 } // namespace math
