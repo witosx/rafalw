@@ -3,6 +3,8 @@
 
 #include <rafalw/utils/static.hpp>
 #include <algorithm>
+#include <vector>
+#include <string>
 
 inline namespace rafalw {
 namespace strings {
@@ -67,6 +69,29 @@ template<typename... Strs>
 auto join(const Strs&... strs) -> std::string
 {
     return joiner("")(strs...);
+}
+
+template<typename Char>
+auto split(const std::basic_string<Char>& s, Char c) -> std::vector<std::basic_string<Char>>
+{
+    auto res = std::vector<std::basic_string<Char>>{};
+    auto idx1 = typename std::basic_string<Char>::size_type{ 0 };
+
+    while (true)
+    {
+        const auto idx2 = s.find(c, idx1);
+
+        if (idx2 == std::basic_string<Char>::npos)
+        {
+            res.push_back(s.substr(idx1));
+            break;
+        }
+
+        res.push_back(s.substr(idx1, idx2 - idx1));
+        idx1 = idx2 + 1;
+    }
+
+    return res;
 }
 
 } // namespace strings
