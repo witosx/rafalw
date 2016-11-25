@@ -4,7 +4,7 @@
 inline namespace rafalw {
 namespace boolean {
 
-auto any() -> bool
+inline auto any() -> bool
 {
     return false;
 }
