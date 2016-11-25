@@ -9,7 +9,7 @@
 inline namespace rafalw {
 namespace math {
 
-auto log(double base, double x) -> double
+inline auto log(double base, double x) -> double
 {
     return std::log2(x) / std::log2(base);
 }
