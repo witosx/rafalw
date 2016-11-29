@@ -97,7 +97,7 @@ public:
             if (!line.empty())
             {
                 try {
-                    m_entry = static_cast<Impl*>(this)->processLine(Line{ line, m_separator, m_emptyPolicy });
+                    m_entry = static_cast<Impl*>(this)->processLine(Line{ line, m_delimiters, m_emptyPolicy });
                 } catch (const Line::NoDataError& e) {
                     m_error = LineError{ m_file.path(), m_lineno, "field ", e.field(), " no more data",  };
                 } catch (const Line::ParseError& e) {
