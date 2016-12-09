@@ -24,7 +24,11 @@ inline auto assertion_check(bool cond, const char* cond_str, const char* file, c
 } // namespace utils
 } // namespace rafalw
 
-#if !defined(RAFALW_UTILS_ASSERT_MODE) || (RAFALW_UTILS_ASSERT_MODE == 0)
+#if !defined(RAFALW_UTILS_ASSERT_MODE)
+#define RAFALW_UTILS_ASSERT_MODE 2
+#endif
+
+#if RAFALW_UTILS_ASSERT_MODE == 0
 #define rafalw_utils_assert(cond)
 #elif RAFALW_UTILS_ASSERT_MODE == 1
 #define rafalw_utils_assert(cond) assert(cond)
