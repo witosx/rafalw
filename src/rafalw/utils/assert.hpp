@@ -35,15 +35,19 @@ inline auto assertion_check_abort(bool cond, const char* cond_str, const char* f
 } // namespace rafalw
 
 #if !defined(RAFALW_UTILS_ASSERT_MODE)
-#define RAFALW_UTILS_ASSERT_MODE 2
+    #ifdef NDEBUG
+        #define RAFALW_UTILS_ASSERT_MODE 0
+    #else
+        #define RAFALW_UTILS_ASSERT_MODE 2
+    #endif
 #endif
 
 #if RAFALW_UTILS_ASSERT_MODE == 0
-#define rafalw_utils_assert(cond)
+    #define rafalw_utils_assert(cond)
 #elif RAFALW_UTILS_ASSERT_MODE == 1
-#define rafalw_utils_assert(cond) ::rafalw::utils::assertion_check_abort(static_cast<bool>(cond), #cond, __FILE__, __PRETTY_FUNCTION__, __LINE__)
+    #define rafalw_utils_assert(cond) ::rafalw::utils::assertion_check_abort(static_cast<bool>(cond), #cond, __FILE__, __PRETTY_FUNCTION__, __LINE__)
 #elif RAFALW_UTILS_ASSERT_MODE == 2
-#define rafalw_utils_assert(cond) ::rafalw::utils::assertion_check_throw(static_cast<bool>(cond), #cond, __FILE__, __PRETTY_FUNCTION__, __LINE__)
+    #define rafalw_utils_assert(cond) ::rafalw::utils::assertion_check_throw(static_cast<bool>(cond), #cond, __FILE__, __PRETTY_FUNCTION__, __LINE__)
 #endif
 
 #endif // RAFALW_UTILS_ASSERT_HPP_
