@@ -154,7 +154,7 @@ public:
         return data().back();
     }
 
-    auto size() const -> const std::size_t
+    auto size() const -> std::size_t
     {
         return data().size();
     }
