@@ -1,7 +1,7 @@
 #ifndef RAFALW_UTILS_ERROR_HPP_
 #define RAFALW_UTILS_ERROR_HPP_
 
-#include <rafalw/utils/strings.hpp>
+#include <rafalw/strings.hpp>
 #include <exception>
 #include <string>
 
@@ -16,7 +16,7 @@ private:
 public:
     template<typename... Args>
     Error(const Args&... args) :
-        m_message{ stringify(args...) }
+        m_message{ strings::stringify(args...) }
     {}
 
     auto what() const noexcept -> const char*

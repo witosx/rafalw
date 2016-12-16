@@ -1,15 +1,15 @@
-#ifndef RAFALW_UTILS_STREAM_HPP_
-#define RAFALW_UTILS_STREAM_HPP_
+#ifndef RAFALW_STREAMS_HPP_
+#define RAFALW_STREAMS_HPP_
 
 #include <rafalw/utils/static.hpp>
 #include <istream>
 #include <ostream>
 
 inline namespace rafalw {
-namespace utils {
+namespace streams {
 
 template<typename T>
-auto stream_get(std::istream& is) -> T
+auto get(std::istream& is) -> T
 {
     auto e = T{};
     is >> e;
@@ -86,7 +86,32 @@ auto stream_range(const T& range) -> StreamRange<T>
     return StreamRange<T>{ range };
 }
 
-} // namespace utils
+template<typename... Args>
+struct StreamArgs
+{
+    StreamArgs(Args... args) :
+        args{ args... }
+    {}
+
+    std::tuple<Args...> args;
+};
+
+template<typename CharT, typename... Args>
+auto operator <<(std::basic_ostream<CharT>& os, const StreamArgs<Args...>& o) -> std::basic_ostream<CharT>&
+{
+    utils::static_foreach(o.args, [&os](auto& e){
+        os << e;
+    });
+    return os;
+}
+
+template<typename... Args>
+auto stream_args(const Args&... args) -> StreamArgs<const Args&...>
+{
+    return StreamArgs<const Args&...>{ args... };
+}
+
+} // namespace streams
 } // namespace rafalw
 
-#endif // RAFALW_UTILS_STREAM_HPP_
+#endif // RAFALW_STREAMS_HPP_
