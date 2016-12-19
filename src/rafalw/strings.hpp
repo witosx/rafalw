@@ -15,6 +15,45 @@
 inline namespace rafalw {
 namespace strings {
 
+namespace detail {
+
+//    template<typename T>
+//    struct ValueWrapper
+//    {
+//        ValueWrapper(T v) :
+//            value{ v }
+//        {}
+//
+//        T value;
+//    };
+//
+//    template<typename T>
+//    struct ReferenceWrapper
+//    {
+//        ReferenceWrapper(const T& r) :
+//            reference{ r }
+//        {}
+//
+//        const T& reference;
+//    };
+//
+//    auto str(ValueWrapper<int> v) -> std::string
+//    {
+//        return std::to_string(v.value);
+//    }
+//
+//    auto str(ValueWrapper<double> v) -> std::string
+//    {
+//        return std::to_string(v.value);
+//    }
+//
+//    auto str(ReferenceWrapper<std::string> v) -> const std::string&
+//    {
+//        return v.reference;
+//    }
+
+} //
+
 template<typename T>
 auto str(const T& obj) -> std::string
 {

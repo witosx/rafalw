@@ -111,6 +111,56 @@ auto stream_args(const Args&... args) -> StreamArgs<const Args&...>
     return StreamArgs<const Args&...>{ args... };
 }
 
+template<typename _Char, typename _Sep>
+class SeparatedWriter
+{
+public:
+    using Char = _Char;
+    using Separator = _Sep;
+    using Stream = std::basic_ostream<Char>;
+
+    template<typename... Args>
+    SeparatedWriter(Stream& stream, Args&&... args) :
+        m_stream{ stream },
+        m_separator{ std::forward<Args>(args)... }
+    {}
+
+    template<typename T>
+    auto operator ()(const T& value) -> void
+    {
+        if (m_init)
+            m_init = false;
+        else
+            m_stream << m_separator;
+
+        m_stream << value;
+    }
+
+private:
+    Stream& m_stream;
+    Separator m_separator;
+
+    bool m_init = true;
+};
+
+template<typename Char>
+auto separated_writer(std::basic_ostream<Char>& stream, Char sep) -> SeparatedWriter<Char, Char>
+{
+    return SeparatedWriter<Char, Char>{ stream, sep };
+}
+
+template<typename Char>
+auto separated_writer(std::basic_ostream<Char>& stream, const Char* sep) -> SeparatedWriter<Char, const Char*>
+{
+    return SeparatedWriter<Char, const Char*>{ stream, sep };
+}
+
+template<typename Char>
+auto separated_writer(std::basic_ostream<Char>& stream, const std::basic_string<Char>& sep) -> SeparatedWriter<Char, std::basic_string<Char>>
+{
+    return SeparatedWriter<Char, std::basic_string<Char>>{ stream, sep };
+}
+
 } // namespace streams
 } // namespace rafalw
 
