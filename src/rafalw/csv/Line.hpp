@@ -11,11 +11,10 @@
 inline namespace rafalw {
 namespace csv {
 
-template<typename _Char>
-class LineGeneric
+class Line
 {
 public:
-    using Char = _Char;
+    using Char = char;
     using String = std::basic_string<Char>;
 
     class Error : public utils::Error
@@ -68,77 +67,69 @@ public:
         }
     };
 
-private:
-    using TokenizerSeparator = boost::char_separator<Char>;
-    using Tokenizer = boost::tokenizer<TokenizerSeparator>;
-
-    String m_delimiters;
-    Tokenizer m_tokenizer;
-    typename Tokenizer::iterator m_iterator;
-    int m_field = 0;
-
-    std::istringstream m_stream;
-
-public:
-    LineGeneric(const String& line_str, String delimiters, Empty ep) :
-        m_delimiters{ delimiters },
-        m_tokenizer{ line_str, TokenizerSeparator{ m_delimiters.c_str(), "", ep == Empty::KEEP ? boost::keep_empty_tokens : boost::drop_empty_tokens } },
-        m_iterator{ m_tokenizer.begin() }
-    {}
-
-    template<typename T>
-    auto operator >>(T& obj) -> LineGeneric&
+    Line(const String& line, String delimiters, Empty ep, const std::string& filename, int lineno) :
+        m_filename{ filename },
+        m_number{ lineno },
+        m_line{ line }
     {
-        if (m_iterator == m_tokenizer.end())
-            throw NoDataError{ m_field };
+        auto idx = std::string::size_type{ 0 };
 
-        m_field++;
+        while (idx != std::string::npos)
+        {
+            const auto idx_sep = m_line.find_first_of(delimiters, idx);
 
-        m_stream.clear();
-        m_stream.str(*m_iterator);
+            if (idx_sep == std::string::npos)
+                break;
 
-        try {
-            m_stream >> obj;
-        } catch (const std::exception& e) {
-            throw ParseError{ m_field, *m_iterator, utils::demangle<T>() };
+            m_items.push_back({ m_line.data() + idx, idx_sep - idx });
+
+            if (ep == Empty::KEEP)
+                idx = idx_sep + 1;
+            else
+                idx = m_line.find_first_not_of(delimiters, idx_sep);
         }
 
-        if (!m_stream)
-            throw ParseError{ m_field, *m_iterator, utils::demangle<T>() };
+        if (idx != std::string::npos)
+            m_items.push_back({ m_line.data() + idx, m_line.size() - idx });
+    }
 
-        ++m_iterator;
-        return *this;
+    auto string() const -> const std::string&
+    {
+        return m_line;
     }
 
     template<typename T>
-    auto get() -> T
+    auto get(int idx) const -> T
     {
-        auto val = T{};
-        *this >> val;
-        return val;
+        auto& item = [this,idx]() -> const Item& {
+            try {
+                return m_items.at(idx);
+            } catch (const std::out_of_range&) {
+                throw NoDataError{ idx };
+            }
+        }();
+
+        try {
+            return streams::convert<T>(item.begin, item.size);
+        } catch (const std::exception& e) {
+            throw ParseError{ idx, std::string(item.begin, item.size), utils::demangle<T>() };
+        }
     }
 
-    auto skip() -> void
+private:
+    struct Item
     {
-        if (m_iterator == m_tokenizer.end())
-            throw NoDataError{ m_field };
+        const char* begin;
+        std::size_t size;
+    };
 
-        ++m_field;
-        ++m_iterator;
-    }
+    const std::string& m_filename;
+    int m_number;
 
-    operator bool() const
-    {
-        return m_iterator < m_tokenizer.end();
-    }
+    String m_line;
 
-    auto operator !() const -> bool
-    {
-        return !static_cast<bool>(*this);
-    }
+    std::vector<Item> m_items;
 };
-
-using Line = LineGeneric<char>;
 
 } // namespace csv
 } // inline namespace rafalw

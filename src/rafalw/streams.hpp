@@ -4,6 +4,7 @@
 #include <rafalw/utils/static.hpp>
 #include <istream>
 #include <ostream>
+#include <sstream>
 
 inline namespace rafalw {
 namespace streams {
@@ -13,7 +14,25 @@ auto get(std::istream& is) -> T
 {
     auto e = T{};
     is >> e;
+
+    if (!is)
+        throw std::runtime_error{ "stream read error" };
+
     return e;
+}
+
+template<typename T>
+auto convert(const char* cstr, std::size_t n) -> T
+{
+    auto ss = std::stringstream{};
+    ss.write(cstr, n);
+    return get<T>(ss);
+}
+
+template<typename T>
+auto convert(const std::string& str) -> T
+{
+    return convert<T>(str.c_str(), str.length());
 }
 
 template<typename... Args>
