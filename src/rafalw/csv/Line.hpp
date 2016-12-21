@@ -4,9 +4,10 @@
 #include <rafalw/csv/common.hpp>
 #include <rafalw/utils/Error.hpp>
 #include <rafalw/utils/demangle.hpp>
+#include <rafalw/streams.hpp>
 #include <string>
 #include <sstream>
-#include <boost/tokenizer.hpp>
+#include <vector>
 
 inline namespace rafalw {
 namespace csv {
