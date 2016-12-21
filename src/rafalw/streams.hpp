@@ -1,13 +1,45 @@
 #ifndef RAFALW_STREAMS_HPP_
 #define RAFALW_STREAMS_HPP_
 
+#include <boost/iterator/iterator_facade.hpp>
+#include <rafalw/utils/Generator.hpp>
 #include <rafalw/utils/static.hpp>
+#include <rafalw/utils/assert.hpp>
 #include <istream>
 #include <ostream>
 #include <sstream>
 
 inline namespace rafalw {
 namespace streams {
+
+class Lines : public utils::Generator<Lines, std::string>
+{
+public:
+    Lines(std::istream& stream) :
+        m_stream{ stream }
+    {
+        update();
+    }
+
+    auto peek() const -> const std::string&
+    {
+        return m_line;
+    }
+
+    auto update() -> void
+    {
+        std::getline(m_stream, m_line);
+    }
+
+    auto done() const -> bool
+    {
+        return m_stream;
+    }
+
+private:
+    std::istream& m_stream;
+    std::string m_line;
+};
 
 template<typename T>
 auto get(std::istream& is) -> T

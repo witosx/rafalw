@@ -11,25 +11,30 @@ namespace utils {
 template<typename _Derived, typename _Element>
 class BasicGenerator
 {
+public:
+    using Element = _Element;
+
+    auto fetch(Element& element) -> bool
+    {
+        derived().doFetch(element);
+    }
+
+    auto operator ()() -> boost::optional<Element>
+    {
+        return fetch();
+    }
+
+    auto doFetch() -> boost::optional<Element>
+    {
+
+    }
+
 protected:
     using Derived = _Derived;
 
     auto derived() -> Derived&
     {
         return static_cast<Derived&>(*this);
-    }
-
-public:
-    using Element = _Element;
-
-    auto next() -> boost::optional<Element>
-    {
-        return derived().fetch();
-    }
-
-    auto operator ()() -> decltype(derived().next())
-    {
-        return derived().next();
     }
 };
 

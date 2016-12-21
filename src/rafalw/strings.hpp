@@ -5,6 +5,7 @@
 #include <rafalw/utils/static.hpp>
 #include <rafalw/streams.hpp>
 #include <boost/tokenizer.hpp>
+#include <boost/utility/string_view.hpp>
 #include <algorithm>
 #include <vector>
 #include <string>
@@ -180,6 +181,44 @@ auto tokenize(const std::basic_string<Char>& str, Char separator) -> std::vector
     auto boost_tokenizer = boost::tokenizer<decltype(boost_separator), typename std::basic_string<Char>::const_iterator, std::basic_string<Char>>{ str, boost_separator };
     return std::vector<std::basic_string<Char>>{ boost_tokenizer.begin(), boost_tokenizer.end() };
 }
+
+
+class Tokens : public utils::Generator<Tokens, boost::string_view>
+{
+public:
+    Tokens(const boost::string_view& string, const boost::string_view& separators) :
+        m_string{ string },
+        m_separators{ separators }
+    {
+        update();
+    }
+
+    auto peek() const -> const boost::string_view&
+    {
+        return m_token;
+    }
+
+    auto update() -> void
+    {
+        const auto idx = m_string.find_first_of(m_separators);
+
+        if (idx == std::string::npos)
+            return;
+
+        m_token = boost::string_view{ m_string.data(), idx };
+        m_string.remove_prefix(idx + 1);
+    }
+
+    auto done() const -> bool
+    {
+        return m_string.empty();
+    }
+
+private:
+    boost::string_view m_string;
+    boost::string_view m_separators;
+    boost::string_view m_token;
+};
 
 } // namespace strings
 } // namespace rafalw
