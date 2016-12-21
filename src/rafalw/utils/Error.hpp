@@ -1,7 +1,7 @@
 #ifndef RAFALW_UTILS_ERROR_HPP_
 #define RAFALW_UTILS_ERROR_HPP_
 
-#include <rafalw/strings.hpp>
+#include <rafalw/strings/misc.hpp>
 #include <exception>
 #include <string>
 

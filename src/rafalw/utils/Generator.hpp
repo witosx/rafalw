@@ -2,11 +2,33 @@
 #define RAFALW_UTILS_GENERATOR_HPP_
 
 #include <rafalw/utils/ScopeGuard.hpp>
+#include <rafalw/utils/assert.hpp>
 #include <boost/iterator/iterator_facade.hpp>
-#include <cassert>
 
 inline namespace rafalw {
 namespace utils {
+
+class GeneratorAccess
+{
+public:
+	template<typename T>
+	static auto done(const T& g) -> bool
+	{
+		return g.generatorDone();
+	}
+
+	template<typename T>
+	static auto peek(const T& g) -> decltype(g.peek())
+	{
+		return g.generatorPeek();
+	}
+
+	template<typename T>
+	static auto update(T& g) -> void
+	{
+		return g.generatorUpdate();
+	}
+};
 
 template<typename _Derived, typename _Element>
 class Generator
@@ -14,35 +36,38 @@ class Generator
 public:
     using Element = _Element;
 
-    class Iterator;
+    auto done() const -> bool
+	{
+    	return GeneratorAccess::done(get());
+	}
+
+    auto peek() const -> const Element&
+	{
+    	return GeneratorAccess::peek(get());
+	}
+
+    auto update() -> void
+	{
+    	return GeneratorAccess::update(get());
+	}
 
     auto next() -> Element
     {
-        auto deferred_update = utils::scope_guard([this](){
-            get().update();
+        auto deferred_update = utils::scope_guard([this]{
+            update();
         });
 
-        return get().peek();
-    }
-
-    auto begin() -> Iterator
-    {
-        return Iterator{ &get() };
-    }
-
-    auto end() -> Iterator
-    {
-        return Iterator{ nullptr };
+        return peek();
     }
 
     operator bool() const
     {
-        return !get().done();
+        return !done();
     }
 
     auto operator !() const -> bool
     {
-        return get().done();
+        return done();
     }
 
     auto operator ()() -> Element
@@ -64,51 +89,56 @@ private:
     }
 };
 
-template<typename T, typename E>
-class Generator<T, E>::Iterator :
-    public boost::iterator_facade<Iterator, const Element, boost::single_pass_traversal_tag>
+template<typename G, typename E>
+class GeneratorIterator: public boost::iterator_facade<GeneratorIterator<G, E>, const E, boost::single_pass_traversal_tag>
 {
+public:
+	using Generator = Generator<G, E>;
+	using Element = typename Generator::Element;
+
+	GeneratorIterator() = default;
+
+    GeneratorIterator(Generator& generator, bool end) :
+        m_generator{ &generator },
+		m_end{ end }
+    {}
+
 private:
     friend class boost::iterator_core_access;
-    friend class Generator;
 
-    T* m_generator;
-    bool m_empty;
-
-    explicit Iterator(T* g) :
-        m_generator{ g },
-        m_empty{ false }
-    {
-        if (m_generator && m_generator->done())
-            m_generator = nullptr;
-    }
+    Generator* m_generator = nullptr;
+    bool m_end = false;
 
     auto increment() -> void
     {
-        assert(m_generator);
-        m_generator->next();
-
-        if (m_generator->done())
-            m_generator = nullptr;
+        rafalw_utils_assert(m_generator);
+        m_generator->update();
+        m_end = m_generator->done();
     }
 
-    auto equal(const Iterator& o) const -> bool
+    auto equal(const GeneratorIterator& o) const -> bool
     {
-        return (m_empty && o.m_empty) || (!m_empty && !o.m_empty && !m_generator && !o.m_generator);
+        return m_end == o.m_end && m_generator == o.m_generator;
     }
 
     auto dereference() const -> const Element&
     {
-        assert(m_generator);
+    	rafalw_utils_assert(m_generator);
         return m_generator->peek();
     }
-
-public:
-    Iterator() :
-        m_generator{ nullptr },
-        m_empty{ true }
-    {}
 };
+
+template<typename G, typename E>
+auto begin(Generator<G, E>& generator) -> GeneratorIterator<G, E>
+{
+    return GeneratorIterator<G, E>{ generator, false };
+}
+
+template<typename G, typename E>
+auto end(Generator<G, E>& generator) -> GeneratorIterator<G, E>
+{
+    return GeneratorIterator<G, E>{ generator, true };
+}
 
 } // namespace utils
 } // namespace rafalw

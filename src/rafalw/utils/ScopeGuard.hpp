@@ -1,5 +1,5 @@
-#ifndef TOOLS_SCOPEGUARD_HPP_
-#define TOOLS_SCOPEGUARD_HPP_
+#ifndef RAFALW_UTILS_SCOPEGUARD_HPP_
+#define RAFALW_UTILS_SCOPEGUARD_HPP_
 
 #include <utility>
 
@@ -63,4 +63,4 @@ auto scope_guard(F func, Args&&... args)
 } // namespace utils
 } // namespace rafalw
 
-#endif // TOOLS_SCOPEGUARD_HPP_
+#endif // RAFALW_UTILS_SCOPEGUARD_HPP_
