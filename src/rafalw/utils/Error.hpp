@@ -10,19 +10,19 @@ namespace utils {
 
 class Error : public std::exception
 {
-private:
-    std::string m_message;
-
 public:
     template<typename... Args>
     Error(const Args&... args) :
         m_message{ strings::stringify(args...) }
     {}
 
-    auto what() const noexcept -> const char*
+    auto what() const noexcept -> const char* final override
     {
         return m_message.c_str();
     }
+
+private:
+    std::string m_message;
 };
 
 } // namespace utils

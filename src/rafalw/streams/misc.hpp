@@ -37,6 +37,8 @@ auto convert(const std::string& str) -> T
     return convert<T>(str.c_str(), str.length());
 }
 
+
+
 template<typename... Args>
 class StreamJoined
 {
@@ -180,6 +182,20 @@ template<typename Char>
 auto separated_writer(std::basic_ostream<Char>& stream, const std::basic_string<Char>& sep) -> SeparatedWriter<Char, std::basic_string<Char>>
 {
     return SeparatedWriter<Char, std::basic_string<Char>>{ stream, sep };
+}
+
+template<typename CharT, typename... Args>
+auto basic_stringify(const Args&... args) -> std::basic_string<CharT>
+{
+    auto ss = std::basic_ostringstream<CharT>{};
+    ss << stream_args(args...);
+    return ss.str();
+}
+
+template<typename... Args>
+auto stringify(const Args&... args) -> std::basic_string<char>
+{
+    return basic_stringify<char>(args...);
 }
 
 } // namespace streams

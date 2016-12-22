@@ -44,4 +44,18 @@ auto test_strings_tokens() -> void
 
 		std::cout << "\n";
 	}
+
+	{
+		auto str = std::string{ "foo   bar baz," };
+		auto tokens = strings::Tokens{ str, " " };
+
+		std::cout << "- string '" << str << "'\n";
+
+		for (auto&& token: tokens)
+		{
+			std::cout << "- token '" << token << "'\n";
+		}
+
+		std::cout << "\n";
+	}
 }
