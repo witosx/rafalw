@@ -11,8 +11,6 @@ template<typename CharT>
 class BasicTokens : public utils::Generator<BasicTokens<CharT>>
 {
 public:
-	using Base = utils::Generator<BasicTokens<CharT>>;
-
 	using Char = CharT;
 	using StringView = boost::basic_string_view<Char>;
 
@@ -20,7 +18,7 @@ public:
         m_string{ string },
         m_separators{ separators }
     {
-    	Base::update();
+    	generatorUpdate();
     }
 
 private:
