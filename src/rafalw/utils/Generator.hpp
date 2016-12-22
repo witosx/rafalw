@@ -10,7 +10,9 @@ namespace utils {
 
 class GeneratorAccess
 {
-public:
+	template<typename T>
+	friend class Generator;
+
 	template<typename T>
 	static decltype(auto) done(const T& g)
 	{
@@ -34,6 +36,8 @@ template<typename DerivedT>
 class Generator
 {
 public:
+	// basic interface: done, peek, update
+
     auto done() const -> bool
 	{
     	return GeneratorAccess::done(derived());
@@ -50,6 +54,8 @@ public:
         rafalw_utils_assert(!done());
     	return GeneratorAccess::update(derived());
 	}
+
+    // convenience helpers
 
     auto next()
     {
@@ -69,6 +75,8 @@ public:
     {
         return done();
     }
+
+    // callable interface
 
     auto operator ()()
     {
