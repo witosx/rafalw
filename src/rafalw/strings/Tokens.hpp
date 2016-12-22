@@ -8,10 +8,10 @@ inline namespace rafalw {
 namespace strings {
 
 template<typename CharT>
-class BasicTokens : public utils::Generator<BasicTokens<CharT>, boost::basic_string_view<CharT>>
+class BasicTokens : public utils::Generator<BasicTokens<CharT>>
 {
 public:
-	using Base = utils::Generator<BasicTokens<CharT>, boost::basic_string_view<CharT>>;
+	using Base = utils::Generator<BasicTokens<CharT>>;
 
 	using Char = CharT;
 	using StringView = boost::basic_string_view<Char>;

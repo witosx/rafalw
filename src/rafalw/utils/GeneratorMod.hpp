@@ -86,7 +86,7 @@ protected:
 };
 
 template<typename G, typename M>
-class GeneratorModified : public Generator<GeneratorModified<G, M>, std::remove_const_t<std::remove_reference_t<decltype(std::declval<M>().peek(std::declval<G>()))>>>
+class GeneratorModified : public Generator<GeneratorModified<G, M>>
 {
 public:
 	template<typename G2, typename M2>
@@ -120,10 +120,10 @@ private:
     }
 };
 
-template<typename D, typename E, typename M>
-auto operator |(Generator<D, E>& gen, GeneratorMod<M> mod) -> GeneratorModified<Generator<D, E>&, GeneratorMod<M>>
+template<typename D, typename M>
+auto operator |(Generator<D>& gen, GeneratorMod<M> mod) -> GeneratorModified<Generator<D>&, GeneratorMod<M>>
 {
-	return GeneratorModified<Generator<D, E>&, GeneratorMod<M>>{ gen, mod };
+	return GeneratorModified<Generator<D>&, GeneratorMod<M>>{ gen, mod };
 }
 
 template<typename F>

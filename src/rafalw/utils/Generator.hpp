@@ -12,43 +12,28 @@ class GeneratorAccess
 {
 public:
 	template<typename T>
-	static auto done(const T& g) -> decltype(g.generatorDone())
+	static decltype(auto) done(const T& g)
 	{
 		return g.generatorDone();
 	}
 
 	template<typename T>
-	static auto peek(const T& g) -> decltype(g.generatorPeek())
+	static decltype(auto) peek(const T& g)
 	{
 		return g.generatorPeek();
 	}
 
 	template<typename T>
-	static auto update(T& g) -> decltype(g.generatorUpdate())
+	static decltype(auto) update(T& g)
 	{
 		return g.generatorUpdate();
 	}
 };
 
-template<typename _Derived, typename _Element>
+template<typename DerivedT>
 class Generator
 {
-private:
-    using Derived = _Derived;
-
-    auto derived() -> Derived&
-    {
-        return static_cast<Derived&>(*this);
-    }
-
-    auto derived() const -> const Derived&
-    {
-        return static_cast<const Derived&>(*this);
-    }
-
 public:
-    using Element = _Element;
-
     auto done() const -> bool
 	{
     	return GeneratorAccess::done(derived());
@@ -66,7 +51,7 @@ public:
     	return GeneratorAccess::update(derived());
 	}
 
-    auto next() -> Element
+    auto next()
     {
         auto deferred_update = utils::scope_guard([this]{
             update();
@@ -85,24 +70,54 @@ public:
         return done();
     }
 
-    auto operator ()() -> Element
+    auto operator ()()
     {
         return next();
     }
+
+private:
+    using Derived = DerivedT;
+
+    auto derived() -> Derived&
+    {
+        return static_cast<Derived&>(*this);
+    }
+
+    auto derived() const -> const Derived&
+    {
+        return static_cast<const Derived&>(*this);
+    }
 };
 
-template<typename G, typename E>
+template<typename T>
+struct GeneratorTraits;
+
+template<typename G>
+struct GeneratorTraits<Generator<G>>
+{
+	using Reference = decltype(std::declval<Generator<G>>().peek());
+	using Value = std::remove_reference_t<Reference>;
+};
+
+template<typename T>
+using GeneratorReference = typename GeneratorTraits<Generator<T>>::Reference;
+
+template<typename T>
+using GeneratorValue = typename GeneratorTraits<Generator<T>>::Value;
+
+
+
+template<typename G>
 class GeneratorIterator:
 		public boost::iterator_facade<
-					GeneratorIterator<G, E>,
-					const E,
+					GeneratorIterator<G>,
+					GeneratorValue<G>,
 					boost::single_pass_traversal_tag,
-					decltype(std::declval<Generator<G, E>>().peek())
+					GeneratorReference<G>
 					>
 {
 public:
-	using Generator = Generator<G, E>;
-	using Element = typename Generator::Element;
+	using Generator = Generator<G>;
 
 	GeneratorIterator() = default;
 
@@ -138,16 +153,16 @@ private:
     }
 };
 
-template<typename G, typename E>
-auto begin(Generator<G, E>& generator) -> GeneratorIterator<G, E>
+template<typename G>
+auto begin(Generator<G>& generator) -> GeneratorIterator<G>
 {
-    return GeneratorIterator<G, E>{ generator, false };
+    return GeneratorIterator<G>{ generator, false };
 }
 
-template<typename G, typename E>
-auto end(Generator<G, E>& generator) -> GeneratorIterator<G, E>
+template<typename G>
+auto end(Generator<G>& generator) -> GeneratorIterator<G>
 {
-    return GeneratorIterator<G, E>{ generator, true };
+    return GeneratorIterator<G>{ generator, true };
 }
 
 } // namespace utils

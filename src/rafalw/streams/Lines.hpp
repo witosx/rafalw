@@ -9,7 +9,7 @@ inline namespace rafalw {
 namespace streams {
 
 template<typename CharT>
-class Lines : public utils::Generator<Lines<CharT>, std::basic_string<CharT>>
+class Lines : public utils::Generator<Lines<CharT>>
 {
 public:
 	using Char = CharT;
