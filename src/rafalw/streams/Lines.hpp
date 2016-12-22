@@ -17,24 +17,26 @@ public:
         update();
     }
 
-    auto peek() const -> const std::string&
+private:
+    friend class utils::GeneratorAccess;
+
+    std::istream& m_stream;
+    std::string m_line;
+
+    auto generatorPeek() const -> const std::string&
     {
         return m_line;
     }
 
-    auto update() -> void
+    auto generatorUpdate() -> void
     {
         std::getline(m_stream, m_line);
     }
 
-    auto done() const -> bool
+    auto generatorDone() const -> bool
     {
         return !m_stream;
     }
-
-private:
-    std::istream& m_stream;
-    std::string m_line;
 };
 
 } // namespace streams

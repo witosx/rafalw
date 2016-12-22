@@ -12,19 +12,25 @@ class GeneratorAccess
 {
 public:
 	template<typename T>
-	static auto done(const T& g) -> bool
+	static auto done(const T& g) -> decltype(g.generatorDone())
 	{
 		return g.generatorDone();
 	}
 
 	template<typename T>
-	static auto peek(const T& g) -> decltype(g.peek())
+	static auto peek(const T& g) -> decltype(g.generatorPeek())
 	{
 		return g.generatorPeek();
 	}
 
+    template<typename T>
+    static auto take(T& g) -> decltype(g.generatorTake())
+    {
+        return g.generatorTake();
+    }
+
 	template<typename T>
-	static auto update(T& g) -> void
+	static auto update(T& g) -> decltype(g.generatorUpdate())
 	{
 		return g.generatorUpdate();
 	}
@@ -38,17 +44,19 @@ public:
 
     auto done() const -> bool
 	{
-    	return GeneratorAccess::done(get());
+    	return GeneratorAccess::done(derived());
 	}
 
     auto peek() const -> const Element&
 	{
-    	return GeneratorAccess::peek(get());
+        rafalw_utils_assert(!done());
+    	return GeneratorAccess::peek(derived());
 	}
 
     auto update() -> void
 	{
-    	return GeneratorAccess::update(get());
+        rafalw_utils_assert(!done());
+    	return GeneratorAccess::update(derived());
 	}
 
     auto next() -> Element
@@ -57,7 +65,7 @@ public:
             update();
         });
 
-        return peek();
+        return take();
     }
 
     operator bool() const
@@ -75,17 +83,28 @@ public:
         return next();
     }
 
+protected:
+    auto generatorTake() -> Element
+    {
+        return peek();
+    }
+
 private:
     using Derived = _Derived;
 
-    auto get() -> Derived&
+    auto derived() -> Derived&
     {
         return static_cast<Derived&>(*this);
     }
 
-    auto get() const -> const Derived&
+    auto derived() const -> const Derived&
     {
         return static_cast<const Derived&>(*this);
+    }
+
+    auto take() -> Element
+    {
+        return GeneratorAccess::take(derived());
     }
 };
 
@@ -100,7 +119,7 @@ public:
 
     GeneratorIterator(Generator& generator, bool end) :
         m_generator{ &generator },
-		m_end{ end }
+		m_end{ end || generator.done() }
     {}
 
 private:
@@ -112,6 +131,8 @@ private:
     auto increment() -> void
     {
         rafalw_utils_assert(m_generator);
+        rafalw_utils_assert(!m_end);
+
         m_generator->update();
         m_end = m_generator->done();
     }

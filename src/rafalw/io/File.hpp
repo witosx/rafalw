@@ -59,6 +59,12 @@ protected:
 public:
     auto open(const std::string& path) -> void
     {
+        if (m_stream.is_open())
+        {
+            m_stream.close();
+            m_stream.clear();
+        }
+
         m_stream.open(path, m_mode);
 
         if (!opened())

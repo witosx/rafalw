@@ -4,7 +4,8 @@
 #include <rafalw/csv/common.hpp>
 #include <rafalw/utils/Error.hpp>
 #include <rafalw/utils/demangle.hpp>
-#include <rafalw/streams.hpp>
+#include <rafalw/strings/Tokens.hpp>
+#include <rafalw/strings/parse.hpp>
 #include <string>
 #include <sstream>
 #include <vector>
@@ -17,6 +18,7 @@ class Line
 public:
     using Char = char;
     using String = std::basic_string<Char>;
+    using StringView = boost::basic_string_view<Char>;
 
     class Error : public utils::Error
     {
@@ -68,30 +70,18 @@ public:
         }
     };
 
-    Line(const String& line, String delimiters, Empty ep, const std::string& filename, int lineno) :
+    Line(const String& line, const StringView& delimiters, Empty ep, const std::string& filename, int lineno) :
+        m_line{ line },
         m_filename{ filename },
-        m_number{ lineno },
-        m_line{ line }
+        m_number{ lineno }
     {
-        auto idx = std::string::size_type{ 0 };
-
-        while (idx != std::string::npos)
+        for (auto&& token: strings::Tokens{ m_line, delimiters })
         {
-            const auto idx_sep = m_line.find_first_of(delimiters, idx);
+            if (ep == Empty::IGNORE && token.empty())
+                continue;
 
-            if (idx_sep == std::string::npos)
-                break;
-
-            m_items.push_back({ m_line.data() + idx, idx_sep - idx });
-
-            if (ep == Empty::KEEP)
-                idx = idx_sep + 1;
-            else
-                idx = m_line.find_first_not_of(delimiters, idx_sep);
+            m_items.push_back(token);
         }
-
-        if (idx != std::string::npos)
-            m_items.push_back({ m_line.data() + idx, m_line.size() - idx });
     }
 
     auto string() const -> const std::string&
@@ -102,34 +92,25 @@ public:
     template<typename T>
     auto get(int idx) const -> T
     {
-        auto& item = [this,idx]() -> const Item& {
-            try {
-                return m_items.at(idx);
-            } catch (const std::out_of_range&) {
-                throw NoDataError{ idx };
-            }
-        }();
+        return strings::parse<T>(get(idx));
+    }
 
+    auto get(int idx) const -> const StringView&
+    {
         try {
-            return streams::convert<T>(item.begin, item.size);
-        } catch (const std::exception& e) {
-            throw ParseError{ idx, std::string(item.begin, item.size), utils::demangle<T>() };
+            return m_items.at(idx);
+        } catch (const std::out_of_range&) {
+            throw NoDataError{ idx };
         }
     }
 
 private:
-    struct Item
-    {
-        const char* begin;
-        std::size_t size;
-    };
+    String m_line;
 
     const std::string& m_filename;
     int m_number;
 
-    String m_line;
-
-    std::vector<Item> m_items;
+    std::vector<StringView> m_items;
 };
 
 } // namespace csv

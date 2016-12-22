@@ -38,7 +38,6 @@ auto convert(const std::string& str) -> T
 }
 
 
-
 template<typename... Args>
 class StreamJoined
 {

@@ -13,13 +13,6 @@ class TextInputFile : public InputFile<TextInputFile, std::ios_base::in>
 public:
     class Lines : public utils::Generator<Lines, std::string>
     {
-    private:
-        TextInputFile* m_input;
-        char m_char;
-
-        std::string m_line;
-        bool m_valid;
-
     public:
         Lines(TextInputFile& input, char c) :
             m_input{ &input },
@@ -28,18 +21,31 @@ public:
             update();
         }
 
-        auto done() const -> bool
+    private:
+        friend class utils::GeneratorAccess;
+
+        TextInputFile* m_input;
+        char m_char;
+
+        std::string m_line;
+        bool m_valid = true;
+
+        auto generatorDone() const -> bool
         {
             return !m_valid;
         }
 
-        auto peek() const -> const std::string&
+        auto generatorPeek() const -> const std::string&
         {
-            assert(!done());
             return m_line;
         }
 
-        auto update() -> void
+        auto generatorTake() -> std::string
+        {
+            return std::move(m_line);
+        }
+
+        auto generatorUpdate() -> void
         {
             m_valid = m_input->doReadLine(m_line, m_char);
         }

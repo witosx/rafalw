@@ -25,21 +25,31 @@ public:
         m_delimiters{ delimiters },
         m_emptyPolicy{ ep }
     {
-        update();
+        generatorUpdate();
     }
 
-    auto done() const -> bool
+private:
+    friend class utils::GeneratorAccess;
+
+    int m_lineno = 1;
+    io::TextInputFile m_file;
+    io::TextInputFile::Lines m_lines{ m_file.lines() };
+
+    String m_delimiters;
+    Empty m_emptyPolicy;
+    boost::optional<Line> m_line;
+
+    auto generatorDone() const -> bool
     {
         return !m_line;
     }
 
-    auto peek() const -> const Line&
+    auto generatorPeek() const -> const Line&
     {
-        rafalw_utils_assert(!done());
         return *m_line;
     }
 
-    auto update() -> void
+    auto generatorUpdate() -> void
     {
         if (!m_lines)
         {
@@ -54,15 +64,6 @@ public:
 
         m_line.emplace(m_lines.peek(), m_delimiters, m_emptyPolicy, m_file.path(), m_lineno);
     }
-
-private:
-    int m_lineno = 1;
-    io::TextInputFile m_file;
-    io::TextInputFile::Lines m_lines{ m_file.lines() };
-
-    String m_delimiters;
-    Empty m_emptyPolicy;
-    boost::optional<Line> m_line;
 };
 
 } // namespace csv
