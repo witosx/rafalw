@@ -11,14 +11,14 @@ namespace io {
 class TextInputFile : public InputFile<TextInputFile, std::ios_base::in>
 {
 public:
-    class Lines : public utils::Generator<Lines, std::string>
+    class Lines : public utils::Generator<Lines>
     {
     public:
         Lines(TextInputFile& input, char c) :
             m_input{ &input },
             m_char{ c }
         {
-            update();
+            generatorUpdate();
         }
 
     private:
@@ -38,11 +38,6 @@ public:
         auto generatorPeek() const -> const std::string&
         {
             return m_line;
-        }
-
-        auto generatorTake() -> std::string
-        {
-            return std::move(m_line);
         }
 
         auto generatorUpdate() -> void

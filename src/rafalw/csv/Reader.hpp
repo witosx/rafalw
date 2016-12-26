@@ -13,7 +13,7 @@
 inline namespace rafalw {
 namespace csv {
 
-class Reader : public utils::Generator<Reader, Line>
+class Reader : public utils::Generator<Reader>
 {
 public:
     using Char = char;

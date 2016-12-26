@@ -97,21 +97,26 @@ private:
     }
 };
 
-template<typename T>
-struct GeneratorTraits;
+namespace detail {
 
-template<typename G>
-struct GeneratorTraits<Generator<G>>
-{
-	using Reference = decltype(std::declval<Generator<G>>().peek());
-	using Value = std::remove_reference_t<Reference>;
-};
+    template<typename T>
+    struct GeneratorTraits;
+
+    template<typename G>
+    struct GeneratorTraits<Generator<G>>
+    {
+        using Reference = decltype(std::declval<Generator<G>>().peek());
+        using Value = std::remove_reference_t<Reference>;
+    };
+
+} // namespace detail
+
 
 template<typename T>
-using GeneratorReference = typename GeneratorTraits<Generator<T>>::Reference;
+using GeneratorReference = typename detail::GeneratorTraits<Generator<T>>::Reference;
 
 template<typename T>
-using GeneratorValue = typename GeneratorTraits<Generator<T>>::Value;
+using GeneratorValue = typename detail::GeneratorTraits<Generator<T>>::Value;
 
 
 

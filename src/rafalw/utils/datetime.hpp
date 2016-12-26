@@ -50,7 +50,7 @@ inline auto to_timestamp(DateTime time) -> double
 }
 
 
-class DateRange : public utils::Generator<DateRange, Date>
+class DateRange : public utils::Generator<DateRange>
 {
 public:
     DateRange(const Date& date_beg, const Date& date_end) :

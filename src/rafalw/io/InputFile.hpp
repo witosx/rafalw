@@ -22,40 +22,6 @@ public:
         {}
     };
 
-private:
-    auto doSeek(std::istream::pos_type pos) -> void
-    {
-        m_stream.seekg(pos);
-        m_stream.clear();
-    }
-
-    template<typename... Args>
-    auto doRead(Args&... args) -> bool
-    {
-        utils::static_foreach(std::tuple<Args&...>(args...), [this](auto& arg) {
-
-            auto pos = m_stream.tellg();
-
-            static_cast<Impl*>(this)->readImpl(arg);
-
-            if (!m_stream.eof() && !m_stream)
-                throw ReadError{ m_path, pos, utils::demangle<decltype(arg)>() };
-        });
-
-        return !m_stream.eof();
-    }
-
-    template<typename T>
-    auto doRead() -> boost::optional<T>
-    {
-        auto v = T{};
-        if (!doRead(v))
-            return {};
-
-        return v;
-    }
-
-public:
     InputFile() :
         File{ M | std::ios_base::in }
     {}
@@ -63,6 +29,11 @@ public:
     InputFile(const std::string& path) :
         File{ M | std::ios_base::in, path }
     {}
+
+    auto position() -> std::istream::pos_type
+    {
+        return m_stream.tellg();
+    }
 
     template<typename... Args>
     auto read(Args&... args) -> bool
@@ -98,6 +69,39 @@ public:
     {
         requireOpened();
         doSeek(pos);
+    }
+
+private:
+    auto doSeek(std::istream::pos_type pos) -> void
+    {
+        m_stream.seekg(pos);
+        m_stream.clear();
+    }
+
+    template<typename... Args>
+    auto doRead(Args&... args) -> bool
+    {
+        utils::static_foreach(std::tuple<Args&...>(args...), [this](auto& arg) {
+
+            auto pos = m_stream.tellg();
+
+            static_cast<Impl*>(this)->readImpl(arg);
+
+            if (!m_stream.eof() && !m_stream)
+                throw ReadError{ m_path, pos, utils::demangle<decltype(arg)>() };
+        });
+
+        return !m_stream.eof();
+    }
+
+    template<typename T>
+    auto doRead() -> boost::optional<T>
+    {
+        auto v = T{};
+        if (!doRead(v))
+            return {};
+
+        return v;
     }
 };
 
