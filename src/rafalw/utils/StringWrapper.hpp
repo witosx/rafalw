@@ -2,76 +2,85 @@
 #define RAFALW_UTILS_STRINGWRAPPER_HPP_
 
 #include <boost/utility/string_view.hpp>
+#include <ostream>
 
 inline namespace rafalw {
 namespace utils {
 
-template<typename StringT>
+template<typename TagT, typename StringT>
 class StringWrapper
 {
 public:
+	using Tag = TagT;
     using String = StringT;
+    using Char = typename String::value_type;
 
-    explicit StringWrapper(const boost::string_view& str) :
+    explicit StringWrapper(const boost::basic_string_view<Char>& str) :
         m_string{ str.data(), str.length() }
     {}
 
-    friend auto to_string(const StringWrapper& f) -> const String&
+    friend auto to_string(const StringWrapper& o) -> const String&
     {
-        return f.m_string;
+        return o.m_string;
     }
 
 private:
     String m_string;
 };
 
-template<typename T>
-auto operator ==(const StringWrapper<T>& f1, const StringWrapper<T>& f2) -> bool
+template<typename TagT, typename StringT>
+auto operator ==(const StringWrapper<TagT, StringT>& o1, const StringWrapper<TagT, StringT>& o2) -> bool
 {
-    return to_string(f1) == to_string(f2);
+    return to_string(o1) == to_string(o2);
 }
 
-template<typename T>
-auto operator <(const StringWrapper<T>& f1, const StringWrapper<T>& f2) -> bool
+template<typename TagT, typename StringT>
+auto operator <(const StringWrapper<TagT, StringT>& o1, const StringWrapper<TagT, StringT>& o2) -> bool
 {
-    return to_string(f1) < to_string(f2);
+    return to_string(o1) < to_string(o2);
 }
 
-template<typename T>
-auto operator !=(const StringWrapper<T>& f1, const StringWrapper<T>& f2) -> bool
+template<typename TagT, typename StringT>
+auto operator !=(const StringWrapper<TagT, StringT>& o1, const StringWrapper<TagT, StringT>& o2) -> bool
 {
-    return to_string(f1) != to_string(f2);
+    return to_string(o1) != to_string(o2);
 }
 
-template<typename T>
-auto operator >=(const StringWrapper<T>& f1, const StringWrapper<T>& f2) -> bool
+template<typename TagT, typename StringT>
+auto operator >=(const StringWrapper<TagT, StringT>& o1, const StringWrapper<TagT, StringT>& o2) -> bool
 {
-    return to_string(f1) >= to_string(f2);
+    return to_string(o1) >= to_string(o2);
 }
 
-template<typename T>
-auto operator <=(const StringWrapper<T>& f1, const StringWrapper<T>& f2) -> bool
+template<typename TagT, typename StringT>
+auto operator <=(const StringWrapper<TagT, StringT>& o1, const StringWrapper<TagT, StringT>& o2) -> bool
 {
-    return to_string(f1) <= to_string(f2);
+    return to_string(o1) <= to_string(o2);
 }
 
-template<typename T>
-auto operator >(const StringWrapper<T>& f1, const StringWrapper<T>& f2) -> bool
+template<typename TagT, typename StringT>
+auto operator >(const StringWrapper<TagT, StringT>& o1, const StringWrapper<TagT, StringT>& o2) -> bool
 {
-    return to_string(f1) > to_string(f2);
+    return to_string(o1) > to_string(o2);
 }
 
 } // namespace utils
 } // namespace rafalw
 
+template<typename TagT, typename StringT>
+auto operator <<(std::ostream& os, const rafalw::utils::StringWrapper<TagT, StringT>& sw) -> std::ostream&
+{
+	return os << to_string(sw);
+}
+
 namespace std {
 
-    template<typename StringT>
-    struct hash<rafalw::utils::StringWrapper<StringT>>
+    template<typename TagT, typename StringT>
+    struct hash<::rafalw::utils::StringWrapper<TagT, StringT>>
     {
-        auto operator()(const rafalw::utils::StringWrapper<StringT>& wrapper) const -> std::size_t
+        auto operator()(const ::rafalw::utils::StringWrapper<TagT, StringT>& wrapper) const -> size_t
         {
-            return std::hash<StringT>{}(to_string(wrapper));
+            return hash<StringT>{}(to_string(wrapper));
         }
     };
 }
