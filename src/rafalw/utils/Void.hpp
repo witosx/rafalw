@@ -4,7 +4,7 @@
 inline namespace rafalw {
 namespace utils {
 
-template<typename T>
+template<typename...>
 using Void = void;
 
 } // namespace utils
