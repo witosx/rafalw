@@ -29,29 +29,17 @@ public:
         Value{ static_cast<Quantity>(other.quantity()) }
     {}
 
+    template<typename Q2, typename = std::enable_if_t<std::is_convertible<Q2, Quantity>::value>>
+    constexpr explicit operator Value<Unit, Q2>()
+    {
+        return Value<Unit, Q2>{ static_cast<Q2>(quantity()) };
+    }
+
     // properties
 
     constexpr auto quantity() const -> Quantity
     {
         return m_quantity;
-    }
-
-    // non-modyfying operators
-
-    template<typename Q2, typename = std::enable_if_t<std::is_convertible<Q2, Quantity>::value>>
-    constexpr explicit operator Value<Unit, Q2>()
-    {
-        return Value<Unit, Q2>{ static_cast<Q2>(m_quantity) };
-    }
-
-    constexpr auto operator +() const -> Value
-    {
-        return *this;
-    }
-
-    constexpr auto operator -() const -> Value
-    {
-        return Value{ -m_quantity };
     }
 
     // modyfying operators
@@ -90,6 +78,8 @@ private:
     Quantity m_quantity;
 };
 
+// non-modyfying operators
+
 template<typename U, typename Q>
 constexpr auto value(Q q) -> Value<U, Q>
 {
@@ -100,6 +90,18 @@ template<typename U, typename Q>
 constexpr auto value_simplify(Value<U, Q> v) -> Value<U, Q>
 {
     return v;
+}
+
+template<typename U, typename Q>
+constexpr auto operator +(Value<U, Q> v) -> Value<U, Q>
+{
+    return v;
+}
+
+template<typename U, typename Q>
+constexpr auto operator -(Value<U, Q> v) -> Value<U, Q>
+{
+    return value<U>(-v.quantity());
 }
 
 // binary operators - comparison
