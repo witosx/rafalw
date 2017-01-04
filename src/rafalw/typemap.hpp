@@ -164,6 +164,12 @@ using from_list = detail::FromList<L>;
 template<typename M>
 using items = detail::Items<M>;
 
+template<typename I>
+using item_key = detail::ItemKey<I>;
+
+template<typename I>
+using item_value = detail::ItemValue<I>;
+
 template<typename M>
 using keys = detail::Keys<M>;
 
