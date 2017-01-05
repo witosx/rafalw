@@ -31,7 +31,7 @@ public:
     {}
 
     template<typename Q2, typename = std::enable_if_t<std::is_convertible<Q2, Quantity>::value>>
-    constexpr explicit operator Value<Unit, Q2>()
+    constexpr explicit operator Value<Unit, Q2>() const
     {
         return Value<Unit, Q2>{ static_cast<Q2>(quantity()) };
     }
@@ -153,28 +153,35 @@ constexpr auto operator *(Value<U1, Q1> v1, Value<U2, Q2> v2) -> decltype(detail
     return detail::simplify(value<units::mul<U1, U2>>(v1.quantity() * v2.quantity()));
 }
 
+template<typename U1, typename Q1, typename U2, typename Q2>
+constexpr auto operator /(Value<U1, Q1> v1, Value<U2, Q2> v2) -> decltype(detail::simplify(value<units::div<U1, U2>>(v1.quantity() / v2.quantity())))
+{
+    return detail::simplify(value<units::div<U1, U2>>(v1.quantity() / v2.quantity()));
+}
+
+
 template<typename U, typename Q1, typename Q2, typename = std::enable_if_t<std::is_arithmetic<Q2>::value>>
-constexpr auto operator *(Value<U, Q1> v, Q2 q) -> decltype(value<U>(v.quantity() * q))
+constexpr auto operator *(Value<U, Q1> v, Q2 q) -> decltype(v * value<units::Null>(q))
 {
     return v * value<units::Null>(q);
 }
 
 template<typename U, typename Q1, typename Q2, typename = std::enable_if_t<std::is_arithmetic<Q2>::value>>
-constexpr auto operator *(Q2 q, Value<U, Q1> v) -> decltype(v * q)
+constexpr auto operator /(Value<U, Q1> v, Q2 q) -> decltype(v / value<units::Null>(q))
+{
+    return v / value<units::Null>(q);
+}
+
+template<typename U, typename Q1, typename Q2, typename = std::enable_if_t<std::is_arithmetic<Q2>::value>>
+constexpr auto operator *(Q2 q, Value<U, Q1> v) -> decltype(value<units::Null>(q) * v)
 {
     return value<units::Null>(q) * v;
 }
 
-template<typename U1, typename Q1, typename U2, typename Q2>
-constexpr auto operator /(Value<U1, Q1> v1, Value<U2, Q2> v2) -> decltype(detail::simplify(value<units::div<U1, U2>>(v1.quantity() * v2.quantity())))
-{
-    return detail::simplify(value<units::div<U1, U2>>(v1.quantity() * v2.quantity()));
-}
-
 template<typename U, typename Q1, typename Q2, typename = std::enable_if_t<std::is_arithmetic<Q2>::value>>
-constexpr auto operator /(Value<U, Q1> v, Q2 q) -> decltype(value<U>(v.quantity() / q))
+constexpr auto operator /(Q2 q, Value<U, Q1> v) -> decltype(value<units::Null>(q) / v)
 {
-    return v / value<units::Null>(q);
+    return value<units::Null>(q) / v;
 }
 
 
@@ -205,13 +212,6 @@ constexpr auto operator /=(Value<U, Q>& v1, Q q) -> Value<U, Q>&
     v1 = v1 / q;
     return v1;
 }
-
-//template<typename U, typename Q>
-//constexpr auto operator /=(Value2<U, Q>& v1, Q q) -> Value2<U, Q>&
-//{
-//    v1 = v1  q;
-//    return v1;
-//}
 
 } // namespace utils
 } // namespace rafalw
