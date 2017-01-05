@@ -8,25 +8,25 @@ inline namespace rafalw {
 namespace utils {
 
 template<typename U, typename Q>
-auto abs(Value<U, Q> v) -> Value<U, Q>
+auto abs(Value<U, Q> v) -> decltype(value<U>(std::abs(v.quantity())))
 {
     return value<U>(std::abs(v.quantity()));
 }
 
 template<typename U, typename Q>
-auto round(Value<U, Q> v) -> Value<U, Q>
+auto round(Value<U, Q> v) -> decltype(value<U>(std::round(v.quantity())))
 {
     return value<U>(std::round(v.quantity()));
 }
 
 template<typename U, typename Q>
-auto ceil(Value<U, Q> v) -> Value<U, Q>
+auto ceil(Value<U, Q> v) -> decltype(value<U>(std::ceil(v.quantity())))
 {
     return value<U>(std::ceil(v.quantity()));
 }
 
 template<typename U, typename Q>
-auto floor(Value<U, Q> v) -> Value<U, Q>
+auto floor(Value<U, Q> v) -> decltype(value<U>(std::floor(v.quantity())))
 {
     return value<U>(std::floor(v.quantity()));
 }

@@ -1,15 +1,16 @@
-#include <rafalw/utils/Value2.hpp>
+#include <rafalw/utils/Value.hpp>
+#include <rafalw/utils/Value_math.hpp>
 #include <rafalw/utils/demangle.hpp>
 #include <iostream>
 
-auto test_utils_value2() -> void
+auto test_utils_value() -> void
 {
 	{
 	    struct Unit1 {};
 	    struct Unit2 {};
 
-	    using Value1 = utils::Value2<units::make<Unit1>, int>;
-	    using Value2 = utils::Value2<units::make<Unit2>, int>;
+	    using Value1 = utils::Value<units::make<Unit1>, int>;
+	    using Value2 = utils::Value<units::make<Unit2>, int>;
 
 	    const auto v1a = Value1{ 10 };
 	    const auto v1b = Value1{ 10 };
