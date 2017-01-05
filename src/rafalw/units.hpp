@@ -47,7 +47,6 @@ using unit_pow = detail::result<detail::UnitPow<U>>;
 template<typename... U>
 struct UnitSet;
 
-template<typename Tag>
 using Null = UnitSet<>;
 
 template<typename Tag>

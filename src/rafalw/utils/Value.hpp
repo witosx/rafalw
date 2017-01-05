@@ -1,7 +1,7 @@
 #ifndef RAFALW_UTILS_VALUE_HPP_
 #define RAFALW_UTILS_VALUE_HPP_
 
-#include <rafalw/typelist.hpp>
+#include <rafalw/units.hpp>
 #include <type_traits>
 #include <cmath>
 #include <functional>
@@ -9,12 +9,15 @@
 inline namespace rafalw {
 namespace utils {
 
-template<typename _Unit, typename _Quantity>
-class Value
+template<typename UnitT, typename QuantityT>
+class Value;
+
+template<typename... UnitsT, typename QuantityT>
+class Value<units::UnitSet<UnitsT...>, QuantityT>
 {
 public:
-    using Unit = _Unit;
-    using Quantity = _Quantity;
+    using Unit = units::UnitSet<UnitsT...>;
+    using Quantity = QuantityT;
 
     static_assert(std::is_arithmetic<Quantity>::value, "must be arithmetic type");
 
@@ -35,43 +38,9 @@ public:
         return Value<Unit, Q2>{ static_cast<Q2>(quantity()) };
     }
 
-    // properties
-
     constexpr auto quantity() const -> Quantity
     {
         return m_quantity;
-    }
-
-    // modyfying operators
-
-    constexpr auto operator +=(Value o) -> Value&
-    {
-        m_quantity += o.quantity();
-        return *this;
-    }
-
-    constexpr auto operator -=(Value o) -> Value&
-    {
-        m_quantity -= o.quantity();
-        return *this;
-    }
-
-    constexpr auto operator *=(Quantity v) -> Value&
-    {
-        m_quantity *= v;
-        return *this;
-    }
-
-    constexpr auto operator /=(Quantity v) -> Value&
-    {
-        m_quantity /= v;
-        return *this;
-    }
-
-    constexpr auto operator %=(Quantity v) -> Value&
-    {
-        m_quantity %= v;
-        return *this;
     }
 
 private:
@@ -86,11 +55,28 @@ constexpr auto value(Q q) -> Value<U, Q>
     return Value<U, Q>{ q };
 }
 
-template<typename U, typename Q>
-constexpr auto value_simplify(Value<U, Q> v) -> Value<U, Q>
-{
-    return v;
-}
+namespace detail {
+
+    template<typename V>
+    constexpr auto simplify(V v, std::false_type) -> V
+    {
+        return v;
+    }
+
+    template<typename V>
+    constexpr auto simplify(V v, std::true_type) -> decltype(v.quantity())
+    {
+        return v.quantity();
+    }
+
+    template<typename U, typename Q>
+    constexpr auto simplify(Value<U, Q> v) -> decltype(simplify(v, typename std::is_same<U, units::Null>::type{}))
+    {
+        return simplify(v, typename std::is_same<U, units::Null>::type{});
+    }
+
+} // namespace detail
+
 
 template<typename U, typename Q>
 constexpr auto operator +(Value<U, Q> v) -> Value<U, Q>
@@ -156,30 +142,71 @@ constexpr auto operator -(Value<U, Q1> v1, Value<U, Q2> v2) -> decltype(value<U>
     return value<U>(v1.quantity() - v2.quantity());
 }
 
+template<typename U1, typename Q1, typename U2, typename Q2>
+constexpr auto operator *(Value<U1, Q1> v1, Value<U2, Q2> v2) -> decltype(detail::simplify(value<units::mul<U1, U2>>(v1.quantity() * v2.quantity())))
+{
+    return detail::simplify(value<units::mul<U1, U2>>(v1.quantity() * v2.quantity()));
+}
 
 template<typename U, typename Q1, typename Q2, typename = std::enable_if_t<std::is_arithmetic<Q2>::value>>
 constexpr auto operator *(Value<U, Q1> v, Q2 q) -> decltype(value<U>(v.quantity() * q))
 {
-    return value<U>(v.quantity() * q);
+    return v * value<units::Null>(q);
 }
 
 template<typename U, typename Q1, typename Q2, typename = std::enable_if_t<std::is_arithmetic<Q2>::value>>
 constexpr auto operator *(Q2 q, Value<U, Q1> v) -> decltype(v * q)
 {
-    return v * q;
+    return value<units::Null>(q) * v;
+}
+
+template<typename U1, typename Q1, typename U2, typename Q2>
+constexpr auto operator /(Value<U1, Q1> v1, Value<U2, Q2> v2) -> decltype(detail::simplify(value<units::div<U1, U2>>(v1.quantity() * v2.quantity())))
+{
+    return detail::simplify(value<units::div<U1, U2>>(v1.quantity() * v2.quantity()));
 }
 
 template<typename U, typename Q1, typename Q2, typename = std::enable_if_t<std::is_arithmetic<Q2>::value>>
 constexpr auto operator /(Value<U, Q1> v, Q2 q) -> decltype(value<U>(v.quantity() / q))
 {
-    return value<U>(v.quantity() / q);
+    return v / value<units::Null>(q);
 }
 
-template<typename U, typename Q1, typename Q2, typename = std::enable_if_t<std::is_arithmetic<Q2>::value>>
-constexpr auto operator /(Value<U, Q1> v, Value<U, Q2> v2) -> decltype(v.quantity() / v2.quantity())
+
+template<typename U, typename Q>
+constexpr auto operator +=(Value<U, Q>& v1, Value<U, Q> v2) -> Value<U, Q>&
 {
-    return v.quantity() / v2.quantity();
+    v1 = v1 + v2;
+    return v1;
 }
+
+template<typename U, typename Q>
+constexpr auto operator -=(Value<U, Q>& v1, Value<U, Q> v2) -> Value<U, Q>&
+{
+    v1 = v1 - v2;
+    return v1;
+}
+
+template<typename U, typename Q>
+constexpr auto operator *=(Value<U, Q>& v1, Q q) -> Value<U, Q>&
+{
+    v1 = v1 * q;
+    return v1;
+}
+
+template<typename U, typename Q>
+constexpr auto operator /=(Value<U, Q>& v1, Q q) -> Value<U, Q>&
+{
+    v1 = v1 / q;
+    return v1;
+}
+
+//template<typename U, typename Q>
+//constexpr auto operator /=(Value2<U, Q>& v1, Q q) -> Value2<U, Q>&
+//{
+//    v1 = v1  q;
+//    return v1;
+//}
 
 // various mathematical functions
 
@@ -207,8 +234,20 @@ auto floor(Value<U, Q> v) -> Value<U, Q>
     return value<U>(std::floor(v.quantity()));
 }
 
+template<typename U, typename Q>
+auto sqrt(Value<U, Q> v) -> decltype(value<units::pow<U, std::ratio<1, 2>>>(std::sqrt(v.quantity())))
+{
+    return value<units::pow<U, std::ratio<1, 2>>>(std::sqrt(v.quantity()));
+}
+
+template<typename U, typename Q>
+auto cbrt(Value<U, Q> v) -> decltype(value<units::pow<U, std::ratio<1, 3>>>(std::cbrt(v.quantity())))
+{
+    return value<units::pow<U, std::ratio<1, 3>>>(std::cbrt(v.quantity()));
+}
+
 } // namespace utils
-} // namespace value
+} // namespace rafalw
 
 namespace std {
 
@@ -223,5 +262,6 @@ struct hash<rafalw::utils::Value<U, Q>>
 };
 
 } // namespace std
+
 
 #endif // RAFALW_UTILS_VALUE_HPP_
