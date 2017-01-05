@@ -6,181 +6,68 @@
 inline namespace rafalw {
 namespace typemap {
 
+namespace detail {
+
+    struct NoDefault {};
+
+    template<typename Op>
+    using result = typename Op::Result;
+
+    template<typename I>
+    struct ItemKeyOp;
+
+    template<typename I>
+    struct ItemValueOp;
+
+    template<typename L>
+    struct FromListOp;
+
+    template<typename M>
+    struct ItemsOp;
+
+    template<typename M, typename K, typename D>
+    struct GetOp;
+
+    template<typename M, typename K, typename V>
+    struct SetOp;
+}
+
 struct NotFound {};
 
+
 template<typename K, typename V>
-struct Item
-{
-    using Key = K;
-    using Value = V;
-};
+struct Item {};
+
+template<typename I>
+using item_key = detail::result<detail::ItemKeyOp<I>>;
+
+template<typename I>
+using item_value = detail::result<detail::ItemValueOp<I>>;
+
 
 template<typename... Items>
 struct Map;
 
-template<typename... Keys, typename... Values>
-struct Map<Item<Keys, Values>...>
-{
-    using Items = typelist::List<Item<Keys, Values>...>;
-};
-
 using empty = Map<>;
 
-namespace detail {
-
-    template<typename L>
-    struct FromListT;
-
-    template<typename... Items>
-    struct FromListT<typelist::List<Items...>>
-    {
-        using Result = Map<Items...>;
-    };
-
-    template<typename L>
-    using FromList = typename FromListT<L>::Result;
-
-
-    struct NoDefault {};
-
-    template<typename I>
-    struct ItemKeyT;
-
-    template<typename K, typename V>
-    struct ItemKeyT<Item<K, V>>
-    {
-        using Result = K;
-    };
-
-    template<typename I>
-    using ItemKey = typename ItemKeyT<I>::Result;
-
-
-
-    template<typename I>
-    struct ItemValueT;
-
-    template<typename K, typename V>
-    struct ItemValueT<Item<K, V>>
-    {
-        using Result = V;
-    };
-
-    template<typename I>
-    using ItemValue = typename ItemValueT<I>::Result;
-
-
-
-
-    template<typename M>
-    using Items = typename M::Items;
-
-    template<typename M>
-    using Keys = typelist::map<Items<M>, ItemKey>;
-
-    template<typename M>
-    using Values = typelist::map<Items<M>, ItemValue>;
-
-    template<typename M, typename Idx, typename Def>
-    struct GetIndex;
-
-    template<typename M, typename Def>
-    struct GetIndex<M, typelist::NotFound, Def>
-    {
-        using Result = Def;
-    };
-
-    template<typename M, typename Def, std::size_t I>
-    struct GetIndex<M, typelist::Index<I>, Def>
-    {
-        using Result = ItemValue<typelist::get<Items<M>, I>>;
-    };
-
-    template<typename M, typename K, typename Def>
-    struct GetDefaultT
-    {
-        using Idx = typelist::find<Keys<M>, K>;
-        using Result = typename GetIndex<M, Idx, Def>::Result;
-    };
-
-    template<typename M, typename K, typename Def>
-    using GetDefault = typename GetDefaultT<M, K, Def>::Result;
-
-    template<typename M, typename K, typename D>
-    struct GetT
-    {
-        using Result = GetDefault<M, K, D>;
-    };
-
-    template<typename M, typename K>
-    struct GetT<M, K, NoDefault>
-    {
-        using Result = GetDefault<M, K, NotFound>;
-        static_assert(!std::is_same<Result, NotFound>::value, "key not found");
-    };
-
-    template<typename M, typename K, typename D>
-    using Get = typename GetT<M, K, D>::Result;
-
-
-    template<typename M, typename Idx, typename K, typename V>
-    struct SetIndex;
-
-    template<typename M, typename K, typename V>
-    struct SetIndex<M, typelist::NotFound, K, V>
-    {
-        using Result = FromList<typelist::append<Items<M>, Item<K, V>>>;
-    };
-
-    template<typename M, typename K, typename V, std::size_t I>
-    struct SetIndex<M, typelist::Index<I>, K, V>
-    {
-        using L = Items<M>;
-        using L1 = typelist::take<L, I>;
-        using L2 = typelist::drop<L, I + 1>;
-        using L3 = typelist::concat<typelist::append<L1, Item<K, V>>, L2>;
-        using Result = FromList<L3>;
-    };
-
-
-
-    template<typename M, typename K, typename V>
-    struct SetT
-    {
-        using Idx = typelist::find<Keys<M>, K>;
-        using Result = typename SetIndex<M, Idx, K, V>::Result;
-    };
-
-    template<typename M, typename K, typename V>
-    using Set = typename SetT<M, K, V>::Result;
-
-    template<typename M, typename K>
-    constexpr auto Contains = typelist::contains<Keys<M>, K>;
-}
-
 template<typename L>
-using from_list = detail::FromList<L>;
+using from_list = detail::result<detail::FromListOp<L>>;
 
 template<typename M>
-using items = detail::Items<M>;
-
-template<typename I>
-using item_key = detail::ItemKey<I>;
-
-template<typename I>
-using item_value = detail::ItemValue<I>;
+using items = detail::result<detail::ItemsOp<M>>;
 
 template<typename M>
-using keys = detail::Keys<M>;
+using keys = typelist::map<items<M>, item_key>;
 
 template<typename M>
-using values = detail::Values<M>;
-
-template<typename M, typename K, typename V>
-using set = detail::Set<M, K, V>;
+using values = typelist::map<items<M>, item_value>;
 
 template<typename M, typename K, typename D = detail::NoDefault>
-using get = detail::Get<M, K, D>;
+using get = detail::result<detail::GetOp<M, K, D>>;
+
+template<typename M, typename K, typename V>
+using set = detail::result<detail::SetOp<M, K, V>>;
+
 
 template<typename M>
 constexpr auto size = typelist::length<items<M>>;
@@ -189,7 +76,105 @@ template<typename M>
 constexpr auto isempty = typelist::isempty<items<M>>;
 
 template<typename M, typename K>
-constexpr auto contains = detail::Contains<M, K>;
+constexpr auto contains = typelist::contains<keys<M>, K>;
+
+
+template<typename... Keys, typename... Values>
+struct Map<Item<Keys, Values>...> {};
+
+
+namespace detail {
+
+    template<typename K, typename V>
+    struct ItemKeyOp<Item<K, V>>
+    {
+        using Result = K;
+    };
+
+    template<typename K, typename V>
+    struct ItemValueOp<Item<K, V>>
+    {
+        using Result = V;
+    };
+
+    template<typename... Items>
+    struct FromListOp<typelist::List<Items...>>
+    {
+        using Result = Map<Items...>;
+    };
+
+    template<typename... Items>
+    struct ItemsOp<Map<Items...>>
+    {
+        using Result = typelist::List<Items...>;
+    };
+
+
+    template<typename M, typename Idx, typename Def>
+    struct GetIndexOp;
+
+    template<typename M, typename Def>
+    struct GetIndexOp<M, typelist::NotFound, Def>
+    {
+        using Result = Def;
+    };
+
+    template<typename M, typename Def, std::size_t I>
+    struct GetIndexOp<M, typelist::Index<I>, Def>
+    {
+        using Result = item_value<typelist::get<items<M>, I>>;
+    };
+
+    template<typename M, typename K, typename Def>
+    struct GetDefaultOp
+    {
+        using Idx = typelist::find<keys<M>, K>;
+        using Result = result<GetIndexOp<M, Idx, Def>>;
+    };
+
+    template<typename M, typename K, typename D>
+    struct GetOp
+    {
+        using Result = result<GetDefaultOp<M, K, D>>;
+    };
+
+    template<typename M, typename K>
+    struct GetOp<M, K, NoDefault>
+    {
+        using Result = result<GetDefaultOp<M, K, NotFound>>;
+        static_assert(!std::is_same<Result, NotFound>::value, "key not found");
+    };
+
+
+
+    template<typename M, typename Idx, typename K, typename V>
+    struct SetIndexOp;
+
+    template<typename M, typename K, typename V>
+    struct SetIndexOp<M, typelist::NotFound, K, V>
+    {
+        using Result = from_list<typelist::append<items<M>, Item<K, V>>>;
+    };
+
+    template<typename M, typename K, typename V, std::size_t I>
+    struct SetIndexOp<M, typelist::Index<I>, K, V>
+    {
+        using L = items<M>;
+        using L1 = typelist::take<L, I>;
+        using L2 = typelist::drop<L, I + 1>;
+        using L3 = typelist::concat<typelist::append<L1, Item<K, V>>, L2>;
+        using Result = from_list<L3>;
+    };
+
+    template<typename M, typename K, typename V>
+    struct SetOp
+    {
+        using Idx = typelist::find<keys<M>, K>;
+        using Result = result<SetIndexOp<M, Idx, K, V>>;
+    };
+}
+
+
 
 } // namespace typemap
 } // namespace rafalw
