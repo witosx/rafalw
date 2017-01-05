@@ -59,6 +59,24 @@ private:
 
 using Tokens = BasicTokens<char>;
 
+template<typename Char, typename Sep>
+auto tokens(const Char* str, Sep&& sep) -> BasicTokens<Char>
+{
+    return BasicTokens<Char>{ str, std::forward<Sep>(sep) };
+}
+
+template<typename Char, typename Sep>
+auto tokens(const std::basic_string<Char>& str, Sep&& sep) -> BasicTokens<Char>
+{
+    return BasicTokens<Char>{ str, std::forward<Sep>(sep) };
+}
+
+template<typename Char, typename Sep>
+auto tokens(const boost::basic_string_view<Char>& str, Sep&& sep) -> BasicTokens<Char>
+{
+    return BasicTokens<Char>{ str, std::forward<Sep>(sep) };
+}
+
 } // namespace strings
 } // namespace rafalw
 

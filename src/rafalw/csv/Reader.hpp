@@ -13,19 +13,24 @@
 inline namespace rafalw {
 namespace csv {
 
-class Reader : public utils::Generator<Reader>
+template<typename CharT>
+class ReaderBasic : public utils::Generator<ReaderBasic<CharT>>
 {
 public:
-    using Char = char;
+    using Char = CharT;
     using String = std::basic_string<Char>;
-    using Line = Line;
 
-    Reader(const std::string& path, String delimiters, Empty ep = Empty::KEEP) :
+    ReaderBasic(const std::string& path, String delimiters, Empty ep = Empty::KEEP) :
         m_file{ path },
         m_delimiters{ delimiters },
         m_emptyPolicy{ ep }
     {
         generatorUpdate();
+    }
+
+    auto path() const -> const std::string&
+    {
+        return m_file.path();
     }
 
 private:
@@ -65,6 +70,8 @@ private:
         m_line.emplace(m_lines.peek(), m_delimiters, m_emptyPolicy, m_file.path(), m_lineno);
     }
 };
+
+using Reader = ReaderBasic<char>;
 
 } // namespace csv
 } // namespace rafalw
