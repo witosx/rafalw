@@ -221,10 +221,9 @@ namespace std {
 template<typename U, typename Q>
 struct hash<rafalw::utils::Value<U, Q>>
 {
-    constexpr auto operator()(rafalw::utils::Value<U, Q> v) const
+    constexpr auto operator()(rafalw::utils::Value<U, Q> v) const noexcept -> std::size_t
     {
-        auto q = v.quantity();
-        return std::hash<decltype(q)>()(q);
+        return hash<Q>{}(v.quantity());
     }
 };
 
