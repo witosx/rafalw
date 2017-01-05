@@ -13,16 +13,16 @@ namespace typelist {
 namespace detail {
 
     template<bool... Args>
-    struct Any;
+    struct AnyOp;
 
     template<>
-    struct Any<> : public std::integral_constant<bool, false> {};
+    struct AnyOp<> : public std::integral_constant<bool, false> {};
 
     template<bool Arg, bool... Args>
-    struct Any<Arg, Args...> : public std::integral_constant<bool, Arg || Any<Args...>::value> {};
+    struct AnyOp<Arg, Args...> : public std::integral_constant<bool, Arg || AnyOp<Args...>::value> {};
 
     template<bool... Args>
-    constexpr auto any = Any<Args...>::value;
+    constexpr auto any = AnyOp<Args...>::value;
 
     template<typename B>
     struct Negate : public std::integral_constant<bool, !B::value> {};
@@ -41,10 +41,9 @@ namespace detail {
         using Result = T<Arg, Args...>;
     };
 
-    template<typename T>
-    using result = typename T::Result;
 
-    // isinstance
+    template<typename Op>
+    using result = typename Op::Result;
 
     template<typename T>
     struct IsInstance;
