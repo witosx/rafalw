@@ -3,8 +3,6 @@
 
 #include <rafalw/units.hpp>
 #include <type_traits>
-#include <cmath>
-#include <functional>
 
 inline namespace rafalw {
 namespace utils {
@@ -54,6 +52,13 @@ constexpr auto value(Q q) -> Value<U, Q>
 {
     return Value<U, Q>{ q };
 }
+
+template<typename Q2, typename U, typename Q1>
+constexpr auto value_cast(Value<U, Q1> v) -> Value<U, Q2>
+{
+    return static_cast<Value<U, Q2>>(v);
+}
+
 
 namespace detail {
 
@@ -207,44 +212,6 @@ constexpr auto operator /=(Value<U, Q>& v1, Q q) -> Value<U, Q>&
 //    v1 = v1  q;
 //    return v1;
 //}
-
-// various mathematical functions
-
-template<typename U, typename Q>
-auto abs(Value<U, Q> v) -> Value<U, Q>
-{
-    return value<U>(std::abs(v.quantity()));
-}
-
-template<typename U, typename Q>
-auto round(Value<U, Q> v) -> Value<U, Q>
-{
-    return value<U>(std::round(v.quantity()));
-}
-
-template<typename U, typename Q>
-auto ceil(Value<U, Q> v) -> Value<U, Q>
-{
-    return value<U>(std::ceil(v.quantity()));
-}
-
-template<typename U, typename Q>
-auto floor(Value<U, Q> v) -> Value<U, Q>
-{
-    return value<U>(std::floor(v.quantity()));
-}
-
-template<typename U, typename Q>
-auto sqrt(Value<U, Q> v) -> decltype(value<units::pow<U, std::ratio<1, 2>>>(std::sqrt(v.quantity())))
-{
-    return value<units::pow<U, std::ratio<1, 2>>>(std::sqrt(v.quantity()));
-}
-
-template<typename U, typename Q>
-auto cbrt(Value<U, Q> v) -> decltype(value<units::pow<U, std::ratio<1, 3>>>(std::cbrt(v.quantity())))
-{
-    return value<units::pow<U, std::ratio<1, 3>>>(std::cbrt(v.quantity()));
-}
 
 } // namespace utils
 } // namespace rafalw
