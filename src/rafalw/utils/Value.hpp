@@ -131,6 +131,7 @@ constexpr auto operator -(Value<U, Q> v) -> Value<U, Q>
     return value<U>(-v.quantity());
 }
 
+
 // binary operators - comparison
 
 template<typename U, typename Q1, typename Q2>
@@ -169,6 +170,7 @@ constexpr auto operator !=(Value<U, Q1> lhs, Value<U, Q2> rhs) -> bool
     return lhs.quantity() != rhs.quantity();
 }
 
+
 // binary operators - arithemtic
 
 template<typename U, typename Q1, typename Q2>
@@ -182,6 +184,7 @@ constexpr auto operator -(Value<U, Q1> lhs, Value<U, Q2> rhs) -> decltype(value<
 {
     return value<U>(lhs.quantity() - rhs.quantity());
 }
+
 
 template<typename U1, typename Q1, typename U2, typename Q2>
 constexpr auto operator *(Value<U1, Q1> lhs, Value<U2, Q2> rhs) -> decltype(value_simplify(value<units::mul<U1, U2>>(lhs.quantity() * rhs.quantity())))
@@ -201,6 +204,7 @@ constexpr auto operator *(Q2 lhs, Value<U, Q1> rhs) -> decltype(detail::binary_o
 	return detail::binary_operation(std::multiplies<>{}, lhs, rhs);
 }
 
+
 template<typename U1, typename Q1, typename U2, typename Q2>
 constexpr auto operator /(Value<U1, Q1> lhs, Value<U2, Q2> rhs) -> decltype(value_simplify(value<units::div<U1, U2>>(lhs.quantity() / rhs.quantity())))
 {
@@ -218,6 +222,7 @@ constexpr auto operator /(Q2 lhs, Value<U, Q1> rhs) -> decltype(detail::binary_o
 {
     return detail::binary_operation(std::divides<>{}, lhs, rhs);
 }
+
 
 template<typename U, typename Q>
 constexpr auto operator +=(Value<U, Q>& lhs, Value<U, Q> rhs) -> Value<U, Q>&
