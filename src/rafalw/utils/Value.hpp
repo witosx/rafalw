@@ -3,6 +3,7 @@
 
 #include <rafalw/units.hpp>
 #include <type_traits>
+#include <functional>
 
 inline namespace rafalw {
 namespace utils {
@@ -45,19 +46,21 @@ private:
     Quantity m_quantity;
 };
 
-// non-modyfying operators
+namespace detail {
 
-template<typename U, typename Q>
-constexpr auto value(Q q) -> Value<U, Q>
-{
-    return Value<U, Q>{ q };
+	template<typename T>
+	struct IsValue : public std::false_type {};
+
+	template<typename U, typename Q>
+	struct IsValue<Value<U, Q>> : public std::true_type {};
+
 }
 
-template<typename Q2, typename U, typename Q1>
-constexpr auto value_cast(Value<U, Q1> v) -> Value<U, Q2>
-{
-    return static_cast<Value<U, Q2>>(v);
-}
+template<typename T>
+using is_value_t = typename detail::IsValue<T>::type;
+
+template<typename T>
+constexpr auto is_value = is_value_t<T>::value;
 
 
 namespace detail {
@@ -74,19 +77,52 @@ namespace detail {
         return v.quantity();
     }
 
-    template<typename U, typename Q>
-    constexpr auto simplify(Value<U, Q> v) -> decltype(simplify(v, typename std::is_same<U, units::Null>::type{}))
+    template<typename T, typename std::enable_if_t<is_value<T>>* = nullptr>
+	constexpr auto valuize(T x) -> T
+	{
+		return x;
+	}
+
+    template<typename T, typename std::enable_if_t<!is_value<T>>* = nullptr>
+    constexpr auto valuize(T x) -> Value<units::Null, T>
     {
-        return simplify(v, typename std::is_same<U, units::Null>::type{});
+        return Value<units::Null, T>{ x };
+    }
+
+    template<typename Op, typename T1, typename T2>
+    auto binary_operation(Op op, T1 lhs, T2 rhs) -> decltype(op(valuize(lhs), valuize(rhs)))
+    {
+    	return op(valuize(lhs), valuize(rhs));
     }
 
 } // namespace detail
 
 
 template<typename U, typename Q>
+constexpr auto value(Q q) -> Value<U, Q>
+{
+    return Value<U, Q>{ q };
+}
+
+template<typename Q2, typename U, typename Q1>
+constexpr auto value_cast(Value<U, Q1> v) -> Value<U, Q2>
+{
+    return static_cast<Value<U, Q2>>(v);
+}
+
+template<typename U, typename Q>
+constexpr auto value_simplify(Value<U, Q> v) -> decltype(detail::simplify(v, typename std::is_same<U, units::Null>::type{}))
+{
+    return detail::simplify(v, typename std::is_same<U, units::Null>::type{});
+}
+
+
+// unary operators
+
+template<typename U, typename Q>
 constexpr auto operator +(Value<U, Q> v) -> Value<U, Q>
 {
-    return v;
+    return value<U>(+v.quantity());
 }
 
 template<typename U, typename Q>
@@ -98,119 +134,113 @@ constexpr auto operator -(Value<U, Q> v) -> Value<U, Q>
 // binary operators - comparison
 
 template<typename U, typename Q1, typename Q2>
-constexpr auto operator <(Value<U, Q1> v1, Value<U, Q2> v2) -> bool
+constexpr auto operator <(Value<U, Q1> lhs, Value<U, Q2> rhs) -> bool
 {
-    return v1.quantity() < v2.quantity();
+    return lhs.quantity() < rhs.quantity();
 }
 
 template<typename U, typename Q1, typename Q2>
-constexpr auto operator <=(Value<U, Q1> v1, Value<U, Q2> v2) -> bool
+constexpr auto operator <=(Value<U, Q1> lhs, Value<U, Q2> rhs) -> bool
 {
-    return v1.quantity() <= v2.quantity();
+    return lhs.quantity() <= rhs.quantity();
 }
 
 template<typename U, typename Q1, typename Q2>
-constexpr auto operator >(Value<U, Q1> v1, Value<U, Q2> v2) -> bool
+constexpr auto operator >(Value<U, Q1> lhs, Value<U, Q2> rhs) -> bool
 {
-    return v1.quantity() > v2.quantity();
+    return lhs.quantity() > rhs.quantity();
 }
 
 template<typename U, typename Q1, typename Q2>
-constexpr auto operator >=(Value<U, Q1> v1, Value<U, Q2> v2) -> bool
+constexpr auto operator >=(Value<U, Q1> lhs, Value<U, Q2> rhs) -> bool
 {
-    return v1.quantity() >= v2.quantity();
+    return lhs.quantity() >= rhs.quantity();
 }
 
 template<typename U, typename Q1, typename Q2>
-constexpr auto operator ==(Value<U, Q1> v1, Value<U, Q2> v2) -> bool
+constexpr auto operator ==(Value<U, Q1> lhs, Value<U, Q2> rhs) -> bool
 {
-    return v1.quantity() == v2.quantity();
+    return lhs.quantity() == rhs.quantity();
 }
 
 template<typename U, typename Q1, typename Q2>
-constexpr auto operator !=(Value<U, Q1> v1, Value<U, Q2> v2) -> bool
+constexpr auto operator !=(Value<U, Q1> lhs, Value<U, Q2> rhs) -> bool
 {
-    return v1.quantity() != v2.quantity();
+    return lhs.quantity() != rhs.quantity();
 }
 
 // binary operators - arithemtic
 
 template<typename U, typename Q1, typename Q2>
-constexpr auto operator +(Value<U, Q1> v1, Value<U, Q2> v2) -> decltype(value<U>(v1.quantity() + v2.quantity()))
+constexpr auto operator +(Value<U, Q1> lhs, Value<U, Q2> rhs) -> decltype(value<U>(lhs.quantity() + rhs.quantity()))
 {
-    return value<U>(v1.quantity() + v2.quantity());
+    return value<U>(lhs.quantity() + rhs.quantity());
 }
 
 template<typename U, typename Q1, typename Q2>
-constexpr auto operator -(Value<U, Q1> v1, Value<U, Q2> v2) -> decltype(value<U>(v1.quantity() - v2.quantity()))
+constexpr auto operator -(Value<U, Q1> lhs, Value<U, Q2> rhs) -> decltype(value<U>(lhs.quantity() - rhs.quantity()))
 {
-    return value<U>(v1.quantity() - v2.quantity());
+    return value<U>(lhs.quantity() - rhs.quantity());
 }
 
 template<typename U1, typename Q1, typename U2, typename Q2>
-constexpr auto operator *(Value<U1, Q1> v1, Value<U2, Q2> v2) -> decltype(detail::simplify(value<units::mul<U1, U2>>(v1.quantity() * v2.quantity())))
+constexpr auto operator *(Value<U1, Q1> lhs, Value<U2, Q2> rhs) -> decltype(value_simplify(value<units::mul<U1, U2>>(lhs.quantity() * rhs.quantity())))
 {
-    return detail::simplify(value<units::mul<U1, U2>>(v1.quantity() * v2.quantity()));
+    return value_simplify(value<units::mul<U1, U2>>(lhs.quantity() * rhs.quantity()));
+}
+
+template<typename U, typename Q1, typename Q2, typename = std::enable_if_t<std::is_arithmetic<Q2>::value>>
+constexpr auto operator *(Value<U, Q1> lhs, Q2 rhs) -> decltype(detail::binary_operation(std::multiplies<>{}, lhs, rhs))
+{
+    return detail::binary_operation(std::multiplies<>{}, lhs, rhs);
+}
+
+template<typename U, typename Q1, typename Q2, typename = std::enable_if_t<std::is_arithmetic<Q2>::value>>
+constexpr auto operator *(Q2 lhs, Value<U, Q1> rhs) -> decltype(detail::binary_operation(std::multiplies<>{}, lhs, rhs))
+{
+	return detail::binary_operation(std::multiplies<>{}, lhs, rhs);
 }
 
 template<typename U1, typename Q1, typename U2, typename Q2>
-constexpr auto operator /(Value<U1, Q1> v1, Value<U2, Q2> v2) -> decltype(detail::simplify(value<units::div<U1, U2>>(v1.quantity() / v2.quantity())))
+constexpr auto operator /(Value<U1, Q1> lhs, Value<U2, Q2> rhs) -> decltype(value_simplify(value<units::div<U1, U2>>(lhs.quantity() / rhs.quantity())))
 {
-    return detail::simplify(value<units::div<U1, U2>>(v1.quantity() / v2.quantity()));
-}
-
-
-template<typename U, typename Q1, typename Q2, typename = std::enable_if_t<std::is_arithmetic<Q2>::value>>
-constexpr auto operator *(Value<U, Q1> v, Q2 q) -> decltype(v * value<units::Null>(q))
-{
-    return v * value<units::Null>(q);
+    return value_simplify(value<units::div<U1, U2>>(lhs.quantity() / rhs.quantity()));
 }
 
 template<typename U, typename Q1, typename Q2, typename = std::enable_if_t<std::is_arithmetic<Q2>::value>>
-constexpr auto operator /(Value<U, Q1> v, Q2 q) -> decltype(v / value<units::Null>(q))
+constexpr auto operator /(Value<U, Q1> lhs, Q2 rhs) -> decltype(detail::binary_operation(std::divides<>{}, lhs, rhs))
 {
-    return v / value<units::Null>(q);
+	return detail::binary_operation(std::divides<>{}, lhs, rhs);
 }
 
 template<typename U, typename Q1, typename Q2, typename = std::enable_if_t<std::is_arithmetic<Q2>::value>>
-constexpr auto operator *(Q2 q, Value<U, Q1> v) -> decltype(value<units::Null>(q) * v)
+constexpr auto operator /(Q2 lhs, Value<U, Q1> rhs) -> decltype(detail::binary_operation(std::divides<>{}, lhs, rhs))
 {
-    return value<units::Null>(q) * v;
-}
-
-template<typename U, typename Q1, typename Q2, typename = std::enable_if_t<std::is_arithmetic<Q2>::value>>
-constexpr auto operator /(Q2 q, Value<U, Q1> v) -> decltype(value<units::Null>(q) / v)
-{
-    return value<units::Null>(q) / v;
-}
-
-
-template<typename U, typename Q>
-constexpr auto operator +=(Value<U, Q>& v1, Value<U, Q> v2) -> Value<U, Q>&
-{
-    v1 = v1 + v2;
-    return v1;
+    return detail::binary_operation(std::divides<>{}, lhs, rhs);
 }
 
 template<typename U, typename Q>
-constexpr auto operator -=(Value<U, Q>& v1, Value<U, Q> v2) -> Value<U, Q>&
+constexpr auto operator +=(Value<U, Q>& lhs, Value<U, Q> rhs) -> Value<U, Q>&
 {
-    v1 = v1 - v2;
-    return v1;
+    return lhs = lhs + rhs;;
 }
 
 template<typename U, typename Q>
-constexpr auto operator *=(Value<U, Q>& v1, Q q) -> Value<U, Q>&
+constexpr auto operator -=(Value<U, Q>& lhs, Value<U, Q> rhs) -> Value<U, Q>&
 {
-    v1 = v1 * q;
-    return v1;
+    return lhs = lhs - rhs;
 }
 
 template<typename U, typename Q>
-constexpr auto operator /=(Value<U, Q>& v1, Q q) -> Value<U, Q>&
+constexpr auto operator *=(Value<U, Q>& lhs, Q rhs) -> Value<U, Q>&
 {
-    v1 = v1 / q;
-    return v1;
+    return lhs = lhs * rhs;
+}
+
+template<typename U, typename Q>
+constexpr auto operator /=(Value<U, Q>& lhs, Q rhs) -> Value<U, Q>&
+{
+    return lhs = lhs / rhs;
 }
 
 } // namespace utils
