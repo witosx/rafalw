@@ -5,11 +5,11 @@
 auto test_value() -> void
 {
 	{
-	    struct Unit1 {};
-	    struct Unit2 {};
+	    struct Unit1 : public units::Tag {};
+	    struct Unit2 : public units::Tag {};
 
-	    using Value1 = value::Value<units::make<Unit1>, int>;
-	    using Value2 = value::Value<units::make<Unit2>, int>;
+	    using Value1 = value::Value<Unit1, int>;
+	    using Value2 = value::Value<Unit2, int>;
 
 	    const auto v1a = Value1{ 10 };
 	    const auto v1b = Value1{ 10 };
@@ -26,6 +26,10 @@ auto test_value() -> void
         std::cout << utils::demangle<decltype(v1a * v1b)>() << "\n";
         std::cout << utils::demangle<decltype(v1a * v2a)>() << "\n";
         std::cout << utils::demangle<decltype(v1a / v1b)>() << "\n";
+
+        auto vx = v1a / v1b;
+
+        std::cout << utils::demangle<decltype(vx)>() << "\n";
 
         auto v2b = Value2{ 2 };
 

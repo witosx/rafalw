@@ -8,16 +8,15 @@ inline namespace rafalw {
 namespace value {
 
 template<typename UnitT, typename QuantityT>
-class Value;
-
-template<typename... UnitsT, typename QuantityT>
-class Value<units::UnitSet<UnitsT...>, QuantityT>
+class Value
 {
-public:
-    using Unit = units::UnitSet<UnitsT...>;
+private:
+    using Unit = UnitT;
     using Quantity = QuantityT;
 
-    static_assert(std::is_arithmetic<Quantity>::value, "must be arithmetic type");
+public:
+    static_assert(units::is_instance<Unit>, "units::is_instance<Unit> check failed");
+    static_assert(std::is_arithmetic<Quantity>::value, "std::is_arithmetic<Quantity> check failed");
 
     constexpr Value() = default;
 
@@ -53,7 +52,32 @@ namespace detail {
 	template<typename U, typename Q>
 	struct IsInstance<Value<U, Q>> : public std::true_type {};
 
+	template<typename T>
+	struct QuantityT;
+
+	template<typename U, typename Q>
+	struct QuantityT<Value<U, Q>>
+	{
+		using Result = Q;
+	};
+
+	template<typename T>
+	struct UnitT;
+
+	template<typename U, typename Q>
+	struct UnitT<Value<U, Q>>
+	{
+		using Result = U;
+	};
+
 } // namespace detail
+
+template<typename T>
+using unit_t = typename detail::UnitT<T>::Result;
+
+template<typename T>
+using quantity_t = typename detail::QuantityT<T>::Result;
+
 
 template<typename T>
 using is_instance_t = typename detail::IsInstance<T>::type;
@@ -82,13 +106,13 @@ constexpr auto cast(Value<U, Q1> v) -> Value<U, Q2>
 
 namespace detail {
 
-    template<typename T, typename std::enable_if_t<is_instance<T> && std::is_same<T, units::Null>::value>* = nullptr>
+    template<typename T, typename std::enable_if_t<units::is_null<unit_t<T>>>* = nullptr>
     constexpr auto simplify(T x) -> decltype(quantity(x))
     {
         return quantity(x);
     }
 
-    template<typename T, typename std::enable_if_t<is_instance<T> && !std::is_same<T, units::Null>::value>* = nullptr>
+    template<typename T, typename std::enable_if_t<!units::is_null<unit_t<T>>>* = nullptr>
 	constexpr auto simplify(T x) -> T
 	{
 		return x;
