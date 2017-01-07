@@ -2,15 +2,12 @@
 #include <rafalw/utils/demangle.hpp>
 #include <iostream>
 
-struct PriceUnitPointsTag {};
-struct PriceUnitCashTag {};
+struct PriceUnitPoints : public units::Tag {};
+struct PriceUnitCash : public units::Tag {};
 
 auto test_units() -> void
 {
 	{
-		using PriceUnitPoints = units::make<PriceUnitPointsTag>;
-		using PriceUnitCash = units::make<PriceUnitCashTag>;
-
 		std::cout << utils::demangle<PriceUnitCash>() << "\n";
 		std::cout << utils::demangle<PriceUnitPoints>() << "\n";
 
