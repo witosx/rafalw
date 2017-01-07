@@ -2,7 +2,7 @@ auto test_strings_tokens() -> void;
 auto test_streams_lines() -> void;
 auto test_utils_stringwrapper() -> void;
 auto test_units() -> void;
-auto test_utils_value() -> void;
+auto test_value() -> void;
 
 auto main() -> int
 {
@@ -10,5 +10,5 @@ auto main() -> int
 //	test_streams_lines();
 //	test_utils_stringwrapper();
 //	test_units();
-	test_utils_value();
+	test_value();
 }

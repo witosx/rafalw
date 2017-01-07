@@ -1,16 +1,15 @@
-#include <rafalw/utils/Value.hpp>
-#include <rafalw/utils/Value_math.hpp>
+#include <rafalw/value.hpp>
 #include <rafalw/utils/demangle.hpp>
 #include <iostream>
 
-auto test_utils_value() -> void
+auto test_value() -> void
 {
 	{
 	    struct Unit1 {};
 	    struct Unit2 {};
 
-	    using Value1 = utils::Value<units::make<Unit1>, int>;
-	    using Value2 = utils::Value<units::make<Unit2>, int>;
+	    using Value1 = value::Value<units::make<Unit1>, int>;
+	    using Value2 = value::Value<units::make<Unit2>, int>;
 
 	    const auto v1a = Value1{ 10 };
 	    const auto v1b = Value1{ 10 };
@@ -37,6 +36,6 @@ auto test_utils_value() -> void
         std::cout << v2b.quantity() << "\n";
 
         std::cout << utils::demangle<decltype(cbrt(sqrt(v2b)))>() << "\n";
-        std::cout << cbrt(sqrt(v2b)).quantity() << "\n";
+        std::cout << quantity(cbrt(sqrt(v2b))) << "\n";
 	}
 }
