@@ -1,7 +1,7 @@
 #ifndef RAFALW_GENERATOR_MODIFIER_HPP_
 #define RAFALW_GENERATOR_MODIFIER_HPP_
 
-#include <rafalw/generator/GeneratorBase.hpp>
+#include <rafalw/generator/Generator.hpp>
 #include <rafalw/generator/GeneratorModified.hpp>
 #include <rafalw/generator/ModifierAccess.hpp>
 

@@ -3,6 +3,6 @@
 
 #include <rafalw/generator/Transform.hpp>
 #include <rafalw/generator/Filter.hpp>
-#include <rafalw/generator/GeneratorBase.hpp>
+#include <rafalw/generator/Generator.hpp>
 
 #endif // RAFALW_GENERATOR_HPP_

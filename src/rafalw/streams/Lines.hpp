@@ -1,7 +1,7 @@
 #ifndef RAFALW_STREAMS_LINES_HPP_
 #define RAFALW_STREAMS_LINES_HPP_
 
-#include <rafalw/generator/GeneratorBase.hpp>
+#include <rafalw/generator/Generator.hpp>
 #include <rafalw/utils/Error.hpp>
 #include <string>
 #include <istream>

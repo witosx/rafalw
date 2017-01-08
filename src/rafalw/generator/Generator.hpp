@@ -1,24 +1,36 @@
-#ifndef RAFALW_GENERATOR_GENERATORBASE_HPP_
-#define RAFALW_GENERATOR_GENERATORBASE_HPP_
+#ifndef RAFALW_GENERATOR_GENERATOR_HPP_
+#define RAFALW_GENERATOR_GENERATOR_HPP_
 
 #include <rafalw/generator/AccessProxy.hpp>
 #include <rafalw/generator/Iterator.hpp>
 #include <rafalw/utils/ScopeGuard.hpp>
+#include <rafalw/utils/Void.hpp>
 #include <rafalw/utils/assert.hpp>
 
 inline namespace rafalw {
 namespace generator {
 
-class GeneratorBase {};
+template<typename T>
+class Generator {};
+
+namespace detail {
+
+	template<typename T>
+	auto is_instance_test_func(const Generator<T>&) -> void;
+
+	template<typename T, typename = utils::Void<T>>
+	struct IsInstance : public std::false_type {};
+
+	template<typename T>
+	struct IsInstance<T, utils::Void<decltype(is_instance_test_func(std::declval<T>()))>> : public std::true_type {};
+
+} // namespace detail
 
 template<typename T>
-class Generator : public GeneratorBase {};
+using is_instance_t = typename detail::IsInstance<T>::type;
 
-template<typename G>
-using is_instance_t = typename std::is_base_of<GeneratorBase, std::remove_reference_t<G>>::type;
-
-template<typename G>
-constexpr auto is_instance = is_instance_t<G>::value;
+template<typename T>
+constexpr auto is_instance = is_instance_t<T>::value;
 
 template<typename T>
 using require_instance = std::enable_if_t<is_instance<T>>;
@@ -86,4 +98,4 @@ auto end(Generator<T>& g) -> decltype(iterator(upcast(g), true))
 } // namespace generator
 } // namespace rafalw
 
-#endif // RAFALW_GENERATOR_GENERATORBASE_HPP_
+#endif // RAFALW_GENERATOR_GENERATOR_HPP_

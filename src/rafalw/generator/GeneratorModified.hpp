@@ -1,7 +1,7 @@
 #ifndef RAFALW_GENERATOR_GENERATORMODIFIED_HPP_
 #define RAFALW_GENERATOR_GENERATORMODIFIED_HPP_
 
-#include <rafalw/generator/GeneratorBase.hpp>
+#include <rafalw/generator/Generator.hpp>
 
 inline namespace rafalw {
 namespace generator {
