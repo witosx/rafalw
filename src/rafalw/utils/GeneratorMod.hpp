@@ -81,8 +81,6 @@ protected:
 	{
 		return gen.update();
 	}
-
-
 };
 
 template<typename G, typename M>
@@ -121,9 +119,15 @@ private:
 };
 
 template<typename D, typename M>
-auto operator |(Generator<D>& gen, GeneratorMod<M> mod) -> GeneratorModified<Generator<D>&, GeneratorMod<M>>
+auto operator >>(Generator<D>& gen, GeneratorMod<M> mod) -> GeneratorModified<Generator<D>&, GeneratorMod<M>>
 {
 	return GeneratorModified<Generator<D>&, GeneratorMod<M>>{ gen, mod };
+}
+
+template<typename D, typename M>
+auto operator >>(Generator<D>&& gen, GeneratorMod<M> mod) -> GeneratorModified<Generator<D>&&, GeneratorMod<M>>
+{
+	return GeneratorModified<Generator<D>&&, GeneratorMod<M>>{ std::move(gen), mod };
 }
 
 template<typename F>
@@ -150,12 +154,70 @@ private:
 };
 
 template<typename F>
-auto gtransform(F&& f) -> GeneratorTransform<std::remove_reference_t<F>>
+auto generator_transform(F&& f) -> GeneratorTransform<std::remove_reference_t<F>>
 {
 	return GeneratorTransform<std::remove_reference_t<F>>{ std::forward<F>(f) };
 }
 
+template<typename D, typename F>
+auto operator %(Generator<D>& gen, F&& f) -> decltype(gen >> generator_transform(std::forward<F>(f)))
+{
+	return gen >> generator_transform(std::forward<F>(f));
+}
 
+template<typename D, typename F>
+auto operator %(Generator<D>&& gen, F&& f) -> decltype(std::move(gen) >> generator_transform(std::forward<F>(f)))
+{
+	return std::move(gen) >> generator_transform(std::forward<F>(f));
+}
+
+template<typename F>
+class GeneratorFilter : public GeneratorMod<GeneratorFilter<F>>
+{
+public:
+	template<typename F2>
+	GeneratorFilter(F2&& f) :
+		m_function{ std::forward<F2>(f) }
+	{}
+
+private:
+	friend class GeneratorModAccess;
+
+	using Function = F;
+
+	Function m_function;
+
+	template<typename G>
+	auto generatorUpdate(G& gen) const -> void
+	{
+		while (true)
+		{
+			gen.update();
+
+			if (!gen || m_function(gen.peek()))
+				break;
+		}
+
+	}
+};
+
+template<typename F>
+auto generator_filter(F&& f) -> GeneratorFilter<std::remove_reference_t<F>>
+{
+	return GeneratorFilter<std::remove_reference_t<F>>{ std::forward<F>(f) };
+}
+
+template<typename D, typename F>
+auto operator |(Generator<D>& gen, F&& f) -> decltype(gen >> generator_filter(std::forward<F>(f)))
+{
+	return gen >> generator_filter(std::forward<F>(f));
+}
+
+template<typename D, typename F>
+auto operator |(Generator<D>&& gen, F&& f) -> decltype(std::move(gen) >> generator_filter(std::forward<F>(f)))
+{
+	return std::move(gen) >> generator_filter(std::forward<F>(f));
+}
 
 } // namespace utils
 } // namespace rafalw

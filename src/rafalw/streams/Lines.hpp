@@ -1,7 +1,8 @@
 #ifndef RAFALW_STREAMS_LINES_HPP_
 #define RAFALW_STREAMS_LINES_HPP_
 
-#include <rafalw/utils/Generator.hpp>
+#include <rafalw/generator/Generator.hpp>
+#include <rafalw/utils/Error.hpp>
 #include <string>
 #include <istream>
 
@@ -9,12 +10,18 @@ inline namespace rafalw {
 namespace streams {
 
 template<typename CharT>
-class Lines : public utils::Generator<Lines<CharT>>
+class Lines : public generator::Generator<Lines<CharT>>
 {
 public:
 	using Char = CharT;
 	using Stream = std::basic_istream<Char>;
 	using String = std::basic_string<Char>;
+
+	class Error : public utils::Error
+	{
+	public:
+		using utils::Error::Error;
+	};
 
     Lines(Stream& stream, Char sep = '\n') :
         m_stream{ stream },
@@ -24,7 +31,7 @@ public:
     }
 
 private:
-    friend class utils::GeneratorAccess;
+    friend class generator::GeneratorAccess;
 
     Stream& m_stream;
     String m_line;
@@ -38,11 +45,14 @@ private:
     auto generatorUpdate() -> void
     {
         getline(m_stream, m_line, m_separator);
+
+        if (!m_stream && !m_stream.eof())
+        	throw Error{ "Lines: read error "};
     }
 
     auto generatorDone() const -> bool
     {
-        return (m_stream.rdstate() & (std::ios_base::failbit | std::ios_base::badbit)) != 0;
+    	return m_stream.fail() || m_stream.bad();
     }
 };
 
