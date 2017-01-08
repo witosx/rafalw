@@ -35,16 +35,10 @@ auto transform(F&& f) -> Transform<std::remove_reference_t<F>>
 	return Transform<std::remove_reference_t<F>>{ std::forward<F>(f) };
 }
 
-template<typename D, typename F>
-auto operator %(Generator<D>& gen, F&& f) -> decltype(gen >> transform(std::forward<F>(f)))
+template<typename G, typename F, typename = require_instance<G>>
+auto operator %(G&& gen, F&& f) -> decltype(std::forward<G>(gen) >> transform(std::forward<F>(f)))
 {
-	return gen >> transform(std::forward<F>(f));
-}
-
-template<typename D, typename F>
-auto operator %(Generator<D>&& gen, F&& f) -> decltype(std::move(gen) >> transform(std::forward<F>(f)))
-{
-	return std::move(gen) >> transform(std::forward<F>(f));
+	return std::forward<G>(gen) >> transform(std::forward<F>(f));
 }
 
 } // namespace generator

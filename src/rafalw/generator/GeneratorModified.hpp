@@ -1,7 +1,7 @@
 #ifndef RAFALW_GENERATOR_GENERATORMODIFIED_HPP_
 #define RAFALW_GENERATOR_GENERATORMODIFIED_HPP_
 
-#include <rafalw/generator/Generator.hpp>
+#include <rafalw/generator/GeneratorBase.hpp>
 
 inline namespace rafalw {
 namespace generator {
@@ -17,7 +17,7 @@ public:
 	{}
 
 private:
-	friend class GeneratorAccess;
+	friend class AccessProxy;
 
 	using BaseGenerator = G;
 	using BaseModifier = M;
@@ -40,6 +40,12 @@ private:
     	return update(m_modifier, m_generator);
     }
 };
+
+template<typename G, typename M, typename = require_instance<G>>
+auto generator_modified(G&& g, M&& m) -> GeneratorModified<G&&, std::remove_reference_t<M>>
+{
+	return GeneratorModified<G&&, std::remove_reference_t<M>>{ std::forward<G>(g), std::forward<M>(m) };
+}
 
 } // namespace generator
 } // namespace rafalw

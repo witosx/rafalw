@@ -1,24 +1,35 @@
 #ifndef RAFALW_GENERATOR_ITERATOR_HPP_
 #define RAFALW_GENERATOR_ITERATOR_HPP_
 
-#include <rafalw/generator/Generator.hpp>
 #include <rafalw/utils/assert.hpp>
 #include <boost/iterator/iterator_facade.hpp>
 
 inline namespace rafalw {
 namespace generator {
 
+namespace detail {
+
+	template<typename G>
+	using iterator_reference = decltype(peek(std::declval<G>()));
+
+	template<typename G>
+	using iterator_value = std::remove_reference_t<iterator_reference<G>>;
+
+	using iterator_tag = boost::single_pass_traversal_tag;
+
+} // namespace detail
+
 template<typename G>
 class Iterator:
 		public boost::iterator_facade<
 					Iterator<G>,
-					GeneratorValue<G>,
-					boost::single_pass_traversal_tag,
-					GeneratorReference<G>
+					detail::iterator_value<G>,
+					detail::iterator_tag,
+					detail::iterator_reference<G>
 					>
 {
 public:
-	using Generator = Generator<G>;
+	using Generator = G;
 
 	Iterator() = default;
 
@@ -55,15 +66,9 @@ private:
 };
 
 template<typename G>
-auto begin(Generator<G>& generator) -> Iterator<G>
+auto iterator(G& g, bool end) -> Iterator<G>
 {
-    return Iterator<G>{ generator, false };
-}
-
-template<typename G>
-auto end(Generator<G>& generator) -> Iterator<G>
-{
-    return Iterator<G>{ generator, true };
+	return Iterator<G>{ g, end };
 }
 
 } // namespace generator

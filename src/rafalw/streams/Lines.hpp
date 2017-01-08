@@ -1,7 +1,7 @@
 #ifndef RAFALW_STREAMS_LINES_HPP_
 #define RAFALW_STREAMS_LINES_HPP_
 
-#include <rafalw/generator/Generator.hpp>
+#include <rafalw/generator/GeneratorBase.hpp>
 #include <rafalw/utils/Error.hpp>
 #include <string>
 #include <istream>
@@ -31,7 +31,7 @@ public:
     }
 
 private:
-    friend class generator::GeneratorAccess;
+    friend class generator::AccessProxy;
 
     Stream& m_stream;
     String m_line;
