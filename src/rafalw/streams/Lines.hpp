@@ -1,7 +1,7 @@
 #ifndef RAFALW_STREAMS_LINES_HPP_
 #define RAFALW_STREAMS_LINES_HPP_
 
-#include <rafalw/generator/Generator.hpp>
+#include <rafalw/generator/Base.hpp>
 #include <rafalw/utils/Error.hpp>
 #include <string>
 #include <istream>
@@ -10,7 +10,7 @@ inline namespace rafalw {
 namespace streams {
 
 template<typename CharT>
-class Lines : public generator::Generator<Lines<CharT>>
+class Lines : private generator::Base
 {
 public:
 	using Char = CharT;

@@ -1,17 +1,17 @@
-#ifndef RAFALW_GENERATOR_GENERATORMODIFIED_HPP_
-#define RAFALW_GENERATOR_GENERATORMODIFIED_HPP_
+#ifndef RAFALW_GENERATOR_MODIFIED_HPP_
+#define RAFALW_GENERATOR_MODIFIED_HPP_
 
-#include <rafalw/generator/Generator.hpp>
+#include <rafalw/generator/Base.hpp>
 
 inline namespace rafalw {
 namespace generator {
 
 template<typename G, typename M>
-class GeneratorModified : public Generator<GeneratorModified<G, M>>
+class Modified : public Base
 {
 public:
 	template<typename G2, typename M2>
-	GeneratorModified(G2&& g, M2&& m) :
+	Modified(G2&& g, M2&& m) :
 		m_generator{ std::forward<G2>(g) },
 		m_modifier{ std::forward<M2>(m) }
 	{}
@@ -41,13 +41,13 @@ private:
     }
 };
 
-template<typename G, typename M, typename = require_instance<G>>
-auto generator_modified(G&& g, M&& m) -> GeneratorModified<G&&, std::remove_reference_t<M>>
+template<typename G, typename M, typename require_instance<G> = {}>
+auto modified(G&& g, M&& m) -> Modified<G&&, std::remove_reference_t<M>>
 {
-	return GeneratorModified<G&&, std::remove_reference_t<M>>{ std::forward<G>(g), std::forward<M>(m) };
+	return Modified<G&&, std::remove_reference_t<M>>{ std::forward<G>(g), std::forward<M>(m) };
 }
 
 } // namespace generator
 } // namespace rafalw
 
-#endif // RAFALW_GENERATOR_GENERATORMODIFIED_HPP_
+#endif // RAFALW_GENERATOR_MODIFIED_HPP_
