@@ -1,10 +1,10 @@
-#ifndef RAFALW_GENERATOR_ACCESSPROXY_HPP_
-#define RAFALW_GENERATOR_ACCESSPROXY_HPP_
+#ifndef RAFALW_GENERATOR_BASEACCESS_HPP_
+#define RAFALW_GENERATOR_BASEACCESS_HPP_
 
 inline namespace rafalw {
 namespace generator {
 
-class AccessProxy
+class BaseAccess
 {
 public:
 	template<typename T>
@@ -29,4 +29,4 @@ public:
 } // namespace generator
 } // namespace rafalw
 
-#endif // RAFALW_GENERATOR_ACCESSPROXY_HPP_
+#endif // RAFALW_GENERATOR_BASEACCESS_HPP_

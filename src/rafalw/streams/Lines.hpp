@@ -31,7 +31,7 @@ public:
     }
 
 private:
-    friend class generator::AccessProxy;
+    friend class generator::BaseAccess;
 
     Stream& m_stream;
     String m_line;

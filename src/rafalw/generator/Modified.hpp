@@ -17,7 +17,7 @@ public:
 	{}
 
 private:
-	friend class AccessProxy;
+	friend class BaseAccess;
 
 	using BaseGenerator = G;
 	using BaseModifier = M;

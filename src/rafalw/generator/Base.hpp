@@ -1,7 +1,7 @@
 #ifndef RAFALW_GENERATOR_BASE_HPP_
 #define RAFALW_GENERATOR_BASE_HPP_
 
-#include <rafalw/generator/AccessProxy.hpp>
+#include <rafalw/generator/BaseAccess.hpp>
 #include <rafalw/generator/Iterator.hpp>
 #include <rafalw/utils/ScopeGuard.hpp>
 #include <rafalw/utils/assert.hpp>
@@ -23,21 +23,21 @@ using require_instance = std::enable_if_t<is_instance<T>, std::nullptr_t>;
 template<typename G, require_instance<G> = nullptr>
 auto done(const G& g) -> bool
 {
-	return AccessProxy::done(g);
+	return BaseAccess::done(g);
 }
 
 template<typename G, require_instance<G> = nullptr>
-auto peek(const G& g) -> decltype(AccessProxy::peek(g))
+auto peek(const G& g) -> decltype(BaseAccess::peek(g))
 {
     rafalw_utils_assert(!done(g));
-	return AccessProxy::peek(g);
+	return BaseAccess::peek(g);
 }
 
 template<typename G, require_instance<G> = nullptr>
 auto update(G& g) -> void
 {
     rafalw_utils_assert(!done(g));
-	return AccessProxy::update(g);
+	return BaseAccess::update(g);
 }
 
 template<typename G, require_instance<G> = nullptr>
