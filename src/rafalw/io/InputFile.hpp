@@ -2,7 +2,6 @@
 #define RAFALW_IO_INPUTFILE_HPP_
 
 #include <rafalw/io/File.hpp>
-#include <rafalw/utils/Generator.hpp>
 #include <rafalw/utils/static.hpp>
 #include <rafalw/utils/demangle.hpp>
 #include <boost/optional.hpp>

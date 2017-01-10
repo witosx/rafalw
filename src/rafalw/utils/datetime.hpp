@@ -4,7 +4,7 @@
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/date_time/posix_time/posix_time_duration.hpp>
-#include <rafalw/utils/Generator.hpp>
+#include <rafalw/generator/Base.hpp>
 #include <cmath>
 
 inline namespace rafalw {
@@ -50,7 +50,7 @@ inline auto to_timestamp(DateTime time) -> double
 }
 
 
-class DateRange : public utils::Generator<DateRange>
+class DateRange : private generator::Base
 {
 public:
     DateRange(const Date& date_beg, const Date& date_end) :
@@ -59,7 +59,7 @@ public:
     {}
 
 private:
-    friend class utils::GeneratorAccess;
+    friend class generator::BaseAccess;
 
     boost::gregorian::date_duration m_step = boost::gregorian::days{ 1 };
 

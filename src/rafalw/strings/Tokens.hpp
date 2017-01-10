@@ -1,14 +1,14 @@
 #ifndef RAFALW_STRINGS_TOKENS_HPP_
 #define RAFALW_STRINGS_TOKENS_HPP_
 
-#include <rafalw/utils/Generator.hpp>
+#include <rafalw/generator/Base.hpp>
 #include <boost/utility/string_view.hpp>
 
 inline namespace rafalw {
 namespace strings {
 
 template<typename CharT>
-class BasicTokens : public utils::Generator<BasicTokens<CharT>>
+class BasicTokens : private generator::Base
 {
 public:
 	using Char = CharT;
@@ -22,7 +22,7 @@ public:
     }
 
 private:
-    friend class utils::GeneratorAccess;
+    friend class generator::BaseAccess;
 
     StringView m_string;
     StringView m_separators;

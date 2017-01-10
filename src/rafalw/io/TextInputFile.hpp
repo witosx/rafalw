@@ -2,7 +2,7 @@
 #define RAFALW_IO_TEXTINPUTFILE_HPP_
 
 #include <rafalw/io/InputFile.hpp>
-#include <rafalw/utils/Generator.hpp>
+#include <rafalw/generator/Base.hpp>
 #include <boost/optional.hpp>
 
 inline namespace rafalw {
@@ -11,7 +11,7 @@ namespace io {
 class TextInputFile : public InputFile<TextInputFile, std::ios_base::in>
 {
 public:
-    class Lines : public utils::Generator<Lines>
+    class Lines : private generator::Base
     {
     public:
         Lines(TextInputFile& input, char c) :
@@ -22,7 +22,7 @@ public:
         }
 
     private:
-        friend class utils::GeneratorAccess;
+        friend class generator::BaseAccess;
 
         TextInputFile* m_input;
         char m_char;

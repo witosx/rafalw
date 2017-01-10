@@ -3,7 +3,7 @@
 
 #include <rafalw/csv/Line.hpp>
 #include <rafalw/io/TextInputFile.hpp>
-#include <rafalw/utils/Generator.hpp>
+#include <rafalw/generator/Base.hpp>
 #include <rafalw/utils/Error.hpp>
 #include <rafalw/utils/assert.hpp>
 #include <rafalw/utils/ScopeGuard.hpp>
@@ -14,7 +14,7 @@ inline namespace rafalw {
 namespace csv {
 
 template<typename CharT>
-class ReaderBasic : public utils::Generator<ReaderBasic<CharT>>
+class ReaderBasic : private generator::Base
 {
 public:
     using Char = CharT;
@@ -34,7 +34,7 @@ public:
     }
 
 private:
-    friend class utils::GeneratorAccess;
+    friend class generator::BaseAccess;
 
     int m_lineno = 1;
     io::TextInputFile m_file;
@@ -56,18 +56,18 @@ private:
 
     auto generatorUpdate() -> void
     {
-        if (!m_lines)
+        if (done(m_lines))
         {
             m_line.reset();
             return;
         }
 
         const auto sg = utils::scope_guard([this]{
-            m_lines.update();
+            update(m_lines);
             m_lineno++;
         });
 
-        m_line.emplace(m_lines.peek(), m_delimiters, m_emptyPolicy, m_file.path(), m_lineno);
+        m_line.emplace(peek(m_lines), m_delimiters, m_emptyPolicy, m_file.path(), m_lineno);
     }
 };
 

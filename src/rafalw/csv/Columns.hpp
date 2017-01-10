@@ -27,7 +27,7 @@ public:
     Columns(Reader& reader) :
         m_path{ reader.path() }
     {
-        auto& line = reader.peek();
+        auto& line = peek(reader);
 
         for (auto&& e: line.items())
         {
@@ -35,7 +35,7 @@ public:
             m_map.emplace(m_data.back().name(), &m_data.back());
         }
 
-        reader.update();
+        update(reader);
     }
 
     auto get(const boost::string_view& name) const -> ColumnSimple
