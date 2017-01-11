@@ -49,9 +49,7 @@ auto valid(const G& g) -> bool
 template<typename G, require_instance<G> = nullptr>
 auto next(G& g) -> std::remove_reference_t<decltype(peek(g))>
 {
-    const auto deferred_update = utils::scope_guard([&g]{
-        update(g);
-    });
+    const auto deferred_update = utils::scope_guard([&g]{ update(g); });
 
     return peek(g);
 }

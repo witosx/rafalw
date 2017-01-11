@@ -1,19 +1,20 @@
 #ifndef RAFALW_UTILS_SCOPEGUARD_HPP_
 #define RAFALW_UTILS_SCOPEGUARD_HPP_
 
+#include <type_traits>
 #include <utility>
 
 inline namespace rafalw {
 namespace utils {
 
-template<typename _Callback>
+template<typename CallbackT>
 class ScopeGuard
 {
 public:
-    using Callback = _Callback;
+    using Callback = CallbackT;
 
     ScopeGuard(Callback func) :
-        m_callback{ func },
+        m_callback{ std::move(func) },
         m_active{ true }
     {}
 
@@ -29,6 +30,10 @@ public:
         fire();
     }
 
+private:
+    Callback m_callback;
+    bool m_active;
+
     auto fire() -> void
     {
         if (m_active)
@@ -37,27 +42,12 @@ public:
             m_active = false;
         }
     }
-
-    auto cancel() -> void
-    {
-        m_active = false;
-    }
-
-private:
-    Callback m_callback;
-    bool m_active;
 };
 
 template<typename F>
-auto scope_guard(F func) -> ScopeGuard<F>
+auto scope_guard(F&& func) -> ScopeGuard<std::remove_reference_t<F>>
 {
-    return ScopeGuard<F>{ std::move(func) };
-}
-
-template<typename F, typename... Args>
-auto scope_guard(F func, Args&&... args)
-{
-    return scope_guard([&,func]() mutable { func(std::forward<Args>(args)...); });
+    return ScopeGuard<std::remove_reference_t<F>>{ std::forward<F>(func) };
 }
 
 } // namespace utils
