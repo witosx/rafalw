@@ -8,12 +8,11 @@
 inline namespace rafalw {
 namespace numeric {
 
-template<typename _Value>
+template<typename ValueT>
 class RollingStats
 {
 public:
-    using Value = _Value;
-    using Value2 = decltype(std::declval<Value>() * std::declval<Value>());
+    using Value = ValueT;
 
     auto push(Value v) -> void
     {
@@ -47,16 +46,20 @@ public:
         return m_sum1 / size();
     }
 
-    auto variance() const -> Value2
+    auto stdev() const -> Value
     {
+        using std::sqrt;
+
         rafalw_utils_assert(size() > 1);
-        auto n = size();
-        auto m1 = mean();
-        auto m2 = m1 * m1;
-        return m_sum2 / (n - 1) - 2 * m1 * m_sum1 / (n - 1) + n * m2 / (n - 1);
+        const auto n = size();
+        const auto m1 = mean();
+        const auto m2 = m1 * m1;
+        return sqrt(m_sum2 / (n - 1) - 2 * m1 * m_sum1 / (n - 1) + n * m2 / (n - 1));
     }
 
 private:
+    using Value2 = decltype(std::declval<Value>() * std::declval<Value>());
+
     std::deque<Value> m_buffer;
 
     Value m_sum1{ 0 };
