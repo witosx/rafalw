@@ -8,62 +8,99 @@
 inline namespace rafalw {
 namespace numeric {
 
-template<typename ValueT>
+template<typename ValueT, typename WeightT = double>
 class RollingStats
 {
 public:
     using Value = ValueT;
+    using Weight = WeightT;
 
-    auto push(Value v) -> void
+    using Result = decltype(std::declval<Weight>() * std::declval<Value>());
+
+    auto push(Value v, Weight w = 1) -> void
     {
-        m_buffer.push_back(v);
-        m_sum1 += v;
-        m_sum2 += v * v;
+        m_data.emplace_back(v, w);
+
+        m_sumWxV += w * v;
+        m_sumWxV2 += w * v * v;
+        m_sumW += w;
     }
 
     auto pop() -> void
     {
-        rafalw_utils_assert(!m_buffer.empty());
-        auto v = m_buffer.front();
-        m_sum1 -= v;
-        m_sum2 -= v * v;
-        m_buffer.pop_front();
+        rafalw_utils_assert(!m_data.empty());
+
+        const auto e = m_data.front();
+        const auto v = e.first;
+        const auto w = e.second;
+
+        m_sumWxV -= w * v;
+        m_sumWxV2 -= w * v * v;
+        m_sumW -= w;
+
+        m_data.pop_front();
+
+        if (m_data.empty())
+        {
+            m_sumWxV = SumWxV{ 0 };
+            m_sumWxV2 = SumWxV2{ 0 };
+            m_sumW = Weight{ 0 };
+        }
     }
 
     auto size() const -> std::size_t
     {
-        return m_buffer.size();
+        return m_data.size();
     }
 
     auto empty() const -> std::size_t
     {
-        return m_buffer.empty();
+        return m_data.empty();
     }
 
-    auto mean() const -> Value
+    auto sum() const -> Result
     {
-        rafalw_utils_assert(size() > 0);
-        return m_sum1 / size();
+        return m_sumWxV;
     }
 
-    auto stdev() const -> Value
+    auto mean() const -> Result
+    {
+        rafalw_utils_assert(m_sumW != 0);
+        return sum() / m_sumW;
+    }
+
+    auto stdev() const -> Result
     {
         using std::sqrt;
 
         rafalw_utils_assert(size() > 1);
+
         const auto n = size();
-        const auto m1 = mean();
-        const auto m2 = m1 * m1;
-        return sqrt(m_sum2 / (n - 1) - 2 * m1 * m_sum1 / (n - 1) + n * m2 / (n - 1));
+        const auto m = mean();
+        const auto m2 = m * m;
+
+        const auto x1 = m_sumWxV2;
+        const auto x2 = 2 * m * m_sumWxV;
+        const auto x3 = m2 * m_sumW;
+
+        const auto d = m_sumW * (n - 1) / n;
+        const auto var = (x1 - x2 + x3) / d;
+
+        rafalw_utils_assert(var >= decltype(var){ 0 });
+
+        return sqrt(var);
     }
 
 private:
-    using Value2 = decltype(std::declval<Value>() * std::declval<Value>());
+    using SumWxV = decltype(std::declval<Weight>() * std::declval<Value>());
+    using SumWxV2 = decltype(std::declval<Weight>() * std::declval<Value>() * std::declval<Value>());
+    using SumW = Weight;
 
-    std::deque<Value> m_buffer;
+    std::deque<std::pair<Value, Weight>> m_data;
 
-    Value m_sum1{ 0 };
-    Value2 m_sum2{ 0 };
+    SumWxV m_sumWxV{ 0 };
+    SumWxV2 m_sumWxV2{ 0 };
+    SumW m_sumW{ 0 };
 };
 
 } // namespace numeric
