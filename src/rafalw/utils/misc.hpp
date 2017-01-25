@@ -3,6 +3,7 @@
 
 #include <iterator>
 #include <functional>
+#include <boost/optional.hpp>
 
 inline namespace rafalw {
 namespace utils {
@@ -51,6 +52,15 @@ constexpr auto round_thr(T vf, T thr) -> Int
         return vi + Int{ 1 };
 
     return vi;
+}
+
+template<typename T, typename F>
+auto eval(T&& val, F&& func) -> boost::optional<decltype(func(std::forward<T>(val)))>
+{
+    if (static_cast<bool>(std::forward<T>(val)))
+        return boost::optional<decltype(func(std::forward<T>(val)))>{ func(std::forward<T>(val)) };
+    else
+        return boost::optional<decltype(func(std::forward<T>(val)))>{};
 }
 
 } // namespace utils
