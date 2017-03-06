@@ -25,8 +25,8 @@ public:
     {}
 
     EMA1(Duration tau) :
-        m_tauGrow{ tau, tau },
-        m_tauReduce{ tau, tau }
+        m_tauGrow{ tau },
+        m_tauReduce{ tau }
     {}
 
     auto initialized() const -> bool

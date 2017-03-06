@@ -26,7 +26,7 @@ public:
         m_sumW += w;
     }
 
-    auto pop() -> void
+    auto popOldest() -> void
     {
         rafalw_utils_assert(!m_data.empty());
 
@@ -46,6 +46,39 @@ public:
             m_sumWxV2 = SumWxV2{ 0 };
             m_sumW = Weight{ 0 };
         }
+    }
+
+    auto popNewest() -> void
+    {
+        rafalw_utils_assert(!m_data.empty());
+
+        const auto e = m_data.back();
+        const auto v = e.first;
+        const auto w = e.second;
+
+        m_sumWxV -= w * v;
+        m_sumWxV2 -= w * v * v;
+        m_sumW -= w;
+
+        m_data.pop_back();
+
+        if (m_data.empty())
+        {
+            m_sumWxV = SumWxV{ 0 };
+            m_sumWxV2 = SumWxV2{ 0 };
+            m_sumW = Weight{ 0 };
+        }
+    }
+
+    auto pop() -> void
+    {
+        popOldest();
+    }
+
+    auto trim(std::size_t n) -> void
+    {
+        while (size() > n)
+            popOldest();
     }
 
     auto size() const -> std::size_t

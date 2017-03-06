@@ -63,6 +63,20 @@ auto eval(T&& val, F&& func) -> boost::optional<decltype(func(std::forward<T>(va
         return boost::optional<decltype(func(std::forward<T>(val)))>{};
 }
 
+template<typename T>
+auto clip(const T& v, const T& vmin, const T& vmax) -> T
+{
+    rafalw_utils_assert(!(vmax < vmin));
+
+    if (v < vmin)
+        return vmin;
+
+    if (vmax < v)
+        return vmax;
+
+    return v;
+}
+
 } // namespace utils
 } // namespace rafalw
 

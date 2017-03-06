@@ -80,6 +80,18 @@ public:
         m_sumW -= w;
     }
 
+    auto trimCount(std::size_t n) -> void
+    {
+        while (size() > n)
+            popElement();
+    }
+
+    auto trimWeight(Weight w) -> void
+    {
+        if (totalWeight() > w)
+            popWeight(totalWeight() - w);
+    }
+
     auto value() const -> Result
     {
         rafalw_utils_assert(totalWeight() != 0);
