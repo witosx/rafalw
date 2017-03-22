@@ -1,7 +1,6 @@
 #ifndef RAFALW_STRINGS_MISC_HPP_
 #define RAFALW_STRINGS_MISC_HPP_
 
-#include <rafalw/utils/Void.hpp>
 #include <rafalw/utils/static.hpp>
 #include <rafalw/streams/misc.hpp>
 #include <boost/tokenizer.hpp>

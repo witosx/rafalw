@@ -2,24 +2,24 @@
 #define RAFALW_NUMERIC_EMA3_HPP_
 
 #include <rafalw/numeric/EMA1.hpp>
-#include <rafalw/numeric/EMA2.hpp>
+#include <rafalw/numeric/EMA2A.hpp>
 #include <cmath>
 #include <utility>
 
 inline namespace rafalw {
 namespace numeric {
 
-template<typename SampleT, typename DurationT = double>
+template<typename SampleT, typename DurationT>
 class EMA3
 {
 public:
     using Sample = SampleT;
     using Duration = DurationT;
 
-    using SEMA = EMA1<Sample, Duration>;
-    using DEMA = EMA2<Sample, Duration>;
+    using EMA1 = EMA1<Sample, Duration>;
+    using EMA2 = EMA2A<Sample, Duration>;
 
-    using Value = typename DEMA::Value;
+    using Value = typename EMA2::Value;
 
     EMA3(Duration tau_grow, Duration tau_reduce) :
         m_sema3{ tau_grow, tau_reduce },
@@ -94,8 +94,8 @@ public:
     }
 
 private:
-    SEMA m_sema3;
-    DEMA m_dema;
+    EMA1 m_sema3;
+    EMA2 m_dema;
 
     boost::optional<Value> m_value;
 };

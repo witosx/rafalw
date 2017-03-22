@@ -2,7 +2,7 @@
 #define RAFALW_NUMERIC_SMA_HPP_
 
 #include <rafalw/numeric/EMA1.hpp>
-#include <rafalw/numeric/EMA2.hpp>
+#include <rafalw/numeric/EMA2A.hpp>
 #include <rafalw/numeric/EMA3.hpp>
 #include <boost/variant.hpp>
 

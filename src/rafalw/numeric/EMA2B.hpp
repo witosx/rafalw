@@ -1,17 +1,13 @@
-#ifndef RAFALW_NUMERIC_EMA1_HPP_
-#define RAFALW_NUMERIC_EMA1_HPP_
+#ifndef RAFALW_NUMERIC_EMA2B_HPP_
+#define RAFALW_NUMERIC_EMA2B_HPP_
 
-#include <rafalw/utils/assert.hpp>
-#include <boost/optional.hpp>
-#include <cmath>
-#include <utility>
-#include <tuple>
+#include <rafalw/numeric/EMA1.hpp>
 
 inline namespace rafalw {
 namespace numeric {
 
 template<typename SampleT, typename DurationT>
-class EMA1
+class EMA2B
 {
 public:
     using Sample = SampleT;
@@ -20,6 +16,8 @@ public:
     using Alpha = decltype(std::exp(-std::declval<Duration>() / std::declval<Duration>()));
     using Value = decltype(std::declval<Sample>() * std::declval<Alpha>());
 
+    using TrendEMA = EMA1<Sample, Duration>;
+
     template<typename, typename ValueT>
     struct Param
     {
@@ -27,20 +25,41 @@ public:
     };
 
     using Tau = Param<class ParamTau, Duration>;
+    using TrendTau = Param<class ParamTrendTau, Duration>;
 
     template<typename... ParamTagT, typename... ParamTypeT>
-    EMA1(const Param<ParamTagT, ParamTypeT>... params) :
-        EMA1{ std::make_tuple(params...) }
+    EMA2B(const Param<ParamTagT, ParamTypeT>... params) :
+        EMA2B{ std::make_tuple(params...) }
     {}
+
+    auto initialize(const Value sample) -> void
+    {
+        m_value = sample;
+        m_trend.initialize(Value{ 0 });
+    }
 
     auto initialized() const -> bool
     {
         return static_cast<bool>(m_value);
     }
 
-    auto initialize(const Value sample) -> void
+    auto updateParam(const Tau tau) -> void
     {
-        m_value = sample;
+        m_tau = tau.value;
+    }
+
+    auto updateParam(const TrendTau tau) -> void
+    {
+        m_trend.updateParam(typename TrendEMA::Tau{ tau.value });
+    }
+
+    auto update(const Sample sample, const Duration duration) -> void
+    {
+        const auto prev_value = m_value;
+        m_value = calculateValue(sample, duration);
+
+        if (prev_value)
+            m_trend.update(*m_value - *prev_value, duration);
     }
 
     auto value() const -> Value
@@ -49,23 +68,20 @@ public:
         return *m_value;
     }
 
-    auto updateParam(const Tau tau) -> void
+    auto trend() const -> Value
     {
-        m_tau = tau.value;
-    }
-
-    auto update(const Sample sample, const Duration duration) -> void
-    {
-        m_value = calculateValue(sample, duration);
+        return m_trend.value();
     }
 
 private:
     Duration m_tau;
+    TrendEMA m_trend;
     boost::optional<Value> m_value;
 
     template<typename... Params>
-    EMA1(const std::tuple<Params...>& params) :
-        m_tau{ std::get<Tau>(params).value }
+    EMA2B(const std::tuple<Params...>& params) :
+        m_tau{ std::get<Tau>(params).value },
+        m_trend{ typename TrendEMA::Tau{ std::get<TrendTau>(params) } }
     {}
 
     auto calculateValue(const Sample sample, const Duration duration) const -> Value
@@ -81,11 +97,11 @@ private:
     {
         rafalw_utils_assert(alpha >= Alpha{ 0 });
         rafalw_utils_assert(alpha <= Alpha{ 1 });
-        return alpha * value() + (Alpha{ 1 } - alpha) * sample;
+        return alpha * (value() + trend()) + (Alpha{ 1 } - alpha) * sample;
     }
 };
 
 } // namespace numeric
 } // namespace rafalw
 
-#endif // RAFALW_NUMERIC_EMA1_HPP_
+#endif // RAFALW_NUMERIC_EMA2B_HPP_
