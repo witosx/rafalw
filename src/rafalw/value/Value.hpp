@@ -15,17 +15,17 @@ private:
     using Quantity = QuantityT;
 
 public:
-    static_assert(units::is_instance<Unit>, "units::is_instance<Unit> check failed");
-    static_assert(std::is_arithmetic<Quantity>::value, "std::is_arithmetic<Quantity> check failed");
+    static_assert(units::is_instance<Unit>);
+    static_assert(std::is_arithmetic<Quantity>::value);
 
     constexpr Value() = default;
 
-    constexpr explicit Value(Quantity q) :
+    constexpr explicit Value(const Quantity q) :
         m_quantity{ q }
     {}
 
     template<typename Q2, typename = std::enable_if_t<std::is_convertible<Q2, Quantity>::value && (std::is_floating_point<Quantity>::value || !std::is_floating_point<Q2>::value)>>
-    constexpr Value(Value<Unit, Q2> other) :
+    constexpr Value(const Value<Unit, Q2> other) :
         Value{ static_cast<Quantity>(other.quantity()) }
     {}
 
@@ -87,19 +87,19 @@ constexpr auto is_instance = is_instance_t<T>::value;
 
 
 template<typename U, typename Q>
-constexpr auto make(Q q) -> Value<U, Q>
+constexpr auto make(const Q q) -> Value<U, Q>
 {
     return Value<U, Q>{ q };
 }
 
 template<typename U, typename Q>
-constexpr auto quantity(Value<U, Q> v) -> Q
+constexpr auto quantity(const Value<U, Q> v) -> Q
 {
     return v.quantity();
 }
 
 template<typename Q2, typename U, typename Q1>
-constexpr auto cast(Value<U, Q1> v) -> Value<U, Q2>
+constexpr auto cast(const Value<U, Q1> v) -> Value<U, Q2>
 {
     return static_cast<Value<U, Q2>>(v);
 }
@@ -107,13 +107,13 @@ constexpr auto cast(Value<U, Q1> v) -> Value<U, Q2>
 namespace detail {
 
     template<typename T, typename std::enable_if_t<units::is_null<unit_t<T>>>* = nullptr>
-    constexpr auto simplify(T x) -> decltype(quantity(x))
+    constexpr auto simplify(const T x) -> decltype(quantity(x))
     {
         return quantity(x);
     }
 
     template<typename T, typename std::enable_if_t<!units::is_null<unit_t<T>>>* = nullptr>
-	constexpr auto simplify(T x) -> T
+	constexpr auto simplify(const T x) -> T
 	{
 		return x;
 	}
@@ -122,7 +122,7 @@ namespace detail {
 
 
 template<typename U, typename Q>
-constexpr auto simplify(Value<U, Q> v) -> decltype(detail::simplify(v))
+constexpr auto simplify(const Value<U, Q> v) -> decltype(detail::simplify(v))
 {
     return detail::simplify(v);
 }
@@ -136,7 +136,7 @@ namespace std {
 template<typename U, typename Q>
 struct hash<rafalw::value::Value<U, Q>>
 {
-    constexpr auto operator()(rafalw::value::Value<U, Q> v) const noexcept -> std::size_t
+    constexpr auto operator()(const rafalw::value::Value<U, Q> v) const noexcept -> std::size_t
     {
         return hash<Q>{}(quantity(v));
     }

@@ -82,7 +82,9 @@ private:
     EMA2B(const std::tuple<Params...>& params) :
         m_tau{ std::get<Tau>(params).value },
         m_trend{ typename TrendEMA::Tau{ std::get<TrendTau>(params).value } }
-    {}
+    {
+        m_trend.initialize(Value{ 0 });
+    }
 
     auto calculateValue(const Sample sample, const Duration duration) const -> Value
     {
