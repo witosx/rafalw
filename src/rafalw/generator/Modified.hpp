@@ -41,10 +41,10 @@ private:
     }
 };
 
-template<typename G, typename M, typename require_instance<G> = {}>
-auto modified(G&& g, M&& m) -> Modified<G&&, std::remove_reference_t<M>>
+template<typename G, typename M, require_instance<G> = nullptr>
+auto modified(G&& g, M&& m) -> Modified<std::decay_t<G>, std::remove_reference_t<M>>
 {
-	return Modified<G&&, std::remove_reference_t<M>>{ std::forward<G>(g), std::forward<M>(m) };
+	return Modified<std::decay_t<G>, std::remove_reference_t<M>>{ std::forward<G>(g), std::forward<M>(m) };
 }
 
 } // namespace generator

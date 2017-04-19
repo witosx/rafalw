@@ -1,5 +1,5 @@
-#ifndef RAFALW_GENERATOR_MODIFIER_HPP_
-#define RAFALW_GENERATOR_MODIFIER_HPP_
+#ifndef RAFALW_GENERATOR_MODIFIERBASE_HPP_
+#define RAFALW_GENERATOR_MODIFIERBASE_HPP_
 
 #include <rafalw/generator/Base.hpp>
 #include <rafalw/generator/Modified.hpp>
@@ -9,7 +9,7 @@ inline namespace rafalw {
 namespace generator {
 
 template<typename DerivedT>
-class Modifier
+class ModifierBase
 {
 protected:
 	template<typename G>
@@ -32,37 +32,37 @@ protected:
 };
 
 template<typename T>
-auto upcast(const Modifier<T>& m) -> const T&
+auto upcast(const ModifierBase<T>& m) -> const T&
 {
 	return static_cast<const T&>(m);
 }
 
 template<typename T>
-auto upcast(Modifier<T>& m) -> T&
+auto upcast(ModifierBase<T>& m) -> T&
 {
 	return static_cast<T&>(m);
 }
 
-template<typename M, typename G, typename require_instance<G> = {}>
-auto done(const Modifier<M>& mod, const G& gen) -> decltype(ModifierAccess::done(upcast(mod), gen))
+template<typename M, typename G, require_instance<G> = nullptr>
+auto done(const ModifierBase<M>& mod, const G& gen) -> decltype(ModifierAccess::done(upcast(mod), gen))
 {
 	return ModifierAccess::done(upcast(mod), gen);
 }
 
-template<typename M, typename G, typename require_instance<G> = {}>
-auto peek(const Modifier<M>& mod, const G& gen) -> decltype(ModifierAccess::peek(upcast(mod), gen))
+template<typename M, typename G, require_instance<G> = nullptr>
+auto peek(const ModifierBase<M>& mod, const G& gen) -> decltype(ModifierAccess::peek(upcast(mod), gen))
 {
 	return ModifierAccess::peek(upcast(mod), gen);
 }
 
-template<typename M, typename G, typename require_instance<G> = {}>
-auto update(Modifier<M>& mod, G& gen) -> decltype(ModifierAccess::update(upcast(mod), gen))
+template<typename M, typename G, require_instance<G> = nullptr>
+auto update(ModifierBase<M>& mod, G& gen) -> decltype(ModifierAccess::update(upcast(mod), gen))
 {
 	return ModifierAccess::update(upcast(mod), gen);
 }
 
-template<typename M, typename G, typename require_instance<G> = {}>
-auto operator >>(G&& gen, Modifier<M> mod) -> decltype(modified(std::forward<G>(gen), std::move(mod)))
+template<typename M, typename G, require_instance<G> = nullptr>
+auto operator >>(G&& gen, ModifierBase<M> mod) -> decltype(modified(std::forward<G>(gen), std::move(mod)))
 {
 	return modified(std::forward<G>(gen), std::move(mod));
 }
@@ -70,4 +70,4 @@ auto operator >>(G&& gen, Modifier<M> mod) -> decltype(modified(std::forward<G>(
 } // namespace generator
 } // namespace rafalw
 
-#endif /* RAFALW_GENERATOR_MODIFIER_HPP_ */
+#endif /* RAFALW_GENERATOR_MODIFIERBASE_HPP_ */

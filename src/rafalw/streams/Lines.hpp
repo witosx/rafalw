@@ -47,7 +47,7 @@ private:
         getline(m_stream, m_line, m_separator);
 
         if (!m_stream && !m_stream.eof())
-        	throw Error{ "Lines: read error "};
+        	throw Error{ "Lines: read error"};
     }
 
     auto generatorDone() const -> bool
