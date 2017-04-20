@@ -12,7 +12,7 @@ class Reference : private Base
 public:
     using Generator = GeneratorT;
 
-    Reference(ConstructTag, Generator& generator) :
+    Reference(Generator& generator) :
         m_generator{ generator }
     {}
 
@@ -45,7 +45,7 @@ private:
 template<typename GeneratorT>
 auto reference(GeneratorT& generator) -> Reference<GeneratorT>
 {
-    return Reference<GeneratorT>{ ConstructTag{}, generator };
+    return Reference<GeneratorT>{ generator };
 }
 
 } // namespace generator

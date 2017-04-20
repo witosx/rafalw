@@ -24,7 +24,7 @@ private:
     std::tuple<GeneratorsT...> m_generators;
 
     using References = std::array<ErasedReference<decltype(peek(std::get<0>(m_generators)))>, sizeof...(GeneratorsT)>;
-    References m_references{{ { ConstructTag{}, std::get<GeneratorsT>(m_generators) }... }};
+    References m_references{{ std::get<GeneratorsT>(m_generators)... }};
 
     typename References::iterator m_current = m_references.begin();
 

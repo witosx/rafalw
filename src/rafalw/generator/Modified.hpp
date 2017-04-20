@@ -39,6 +39,11 @@ private:
     {
     	return update(m_modifier, m_generator);
     }
+
+    auto generatorReset()
+    {
+        return try_reset(m_generator);
+    }
 };
 
 template<typename G, typename M, require_instance<G> = nullptr>

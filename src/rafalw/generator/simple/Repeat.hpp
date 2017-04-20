@@ -12,7 +12,7 @@ class Repeat : private Base
 public:
     using Value = ValueT;
 
-    Repeat(const Value& value) :
+    explicit Repeat(const Value& value) :
         m_value{ value }
     {}
 
