@@ -14,15 +14,17 @@ public:
     using IteratorEnd = IteratorEndT;
 
     View(const Iterator begin, const IteratorEnd end) :
-        m_current{ begin },
+        m_begin{ begin },
         m_end{ end }
     {}
 
 private:
     friend class BaseAccess;
 
-    Iterator m_current;
+    Iterator m_begin;
     IteratorEnd m_end;
+
+    Iterator m_current = m_begin;
 
     auto generatorDone() const -> bool
     {
@@ -37,6 +39,11 @@ private:
     auto generatorUpdate() -> void
     {
         m_current++;
+    }
+
+    auto generatorReset() -> void
+    {
+        m_current = m_begin;
     }
 };
 

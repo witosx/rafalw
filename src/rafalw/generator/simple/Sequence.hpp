@@ -15,7 +15,7 @@ public:
     using Step = StepT;
 
     Sequence(const Index begin, const Index end, const Step step) :
-        m_current{ begin },
+        m_begin{ begin },
         m_end{ end },
         m_step{ step }
     {}
@@ -23,9 +23,11 @@ public:
 private:
     friend class BaseAccess;
 
-    Index m_current;
+    Index m_begin;
     Index m_end;
     Step m_step;
+
+    Index m_current = m_begin;
 
     auto generatorDone() const -> bool
     {
@@ -40,6 +42,11 @@ private:
     auto generatorUpdate() -> void
     {
         m_current += m_step;
+    }
+
+    auto generatorReset() -> void
+    {
+        m_current = m_begin;
     }
 };
 

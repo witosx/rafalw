@@ -32,7 +32,14 @@ private:
     }
 
     auto generatorUpdate() -> void
-    {}
+    {
+        // nothing to do
+    }
+
+    auto generatorReset() -> void
+    {
+        // nothing to do
+    }
 };
 
 template<typename Value>

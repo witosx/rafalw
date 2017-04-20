@@ -50,7 +50,7 @@ class ErasedReference : private Base
 {
 public:
     template<typename GeneratorT>
-    ErasedReference(GeneratorT& generator) :
+    ErasedReference(ConstructTag, GeneratorT& generator) :
         m_generator{ &generator },
         m_fetch(fetch<GeneratorT>)
     {
@@ -98,12 +98,15 @@ private:
     {
         m_element = m_fetch(m_generator);
     }
+
+    auto generatorReset() -> ResetNotImplemented
+    {}
 };
 
 template<typename Generator>
 auto erased_reference(Generator& gen) -> ErasedReference<decltype(peek(gen))>
 {
-    return ErasedReference<decltype(peek(gen))>{ gen };
+    return ErasedReference<decltype(peek(gen))>{ ConstructTag{}, gen };
 }
 
 } // namespace generator

@@ -14,7 +14,7 @@ class Zip : private Base
 {
 public:
     template<typename... GeneratorsT2>
-    Zip(GeneratorsT2&&... generators) :
+    Zip(ConstructTag, GeneratorsT2&&... generators) :
         m_generators{ std::forward<GeneratorsT2>(generators)... }
     {}
 
@@ -43,12 +43,29 @@ private:
             update(gen);
         });
     }
+
+    auto generatorReset()
+    {
+        constexpr auto ok = std::conjunction<std::bool_constant<has_reset<GeneratorsT>>...>::value;
+
+        if constexpr (ok)
+        {
+            utils::static_foreach(m_generators, [](auto& gen){
+                reset(gen);
+            });
+            return;
+        }
+        else
+        {
+            return ResetNotImplemented{};
+        }
+    }
 };
 
 template<typename... GeneratorsT>
 auto zip(GeneratorsT&&... generators) -> Zip<std::decay_t<GeneratorsT>...>
 {
-    return Zip<std::decay_t<GeneratorsT>...>{ std::forward<GeneratorsT>(generators)... };
+    return Zip<std::decay_t<GeneratorsT>...>{ ConstructTag{}, std::forward<GeneratorsT>(generators)... };
 }
 
 } // namespace generator
