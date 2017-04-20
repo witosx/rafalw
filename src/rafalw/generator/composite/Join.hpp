@@ -57,11 +57,11 @@ private:
             });
 
             m_current = m_references.begin();
-            return;
+            return RESET_OK;
         }
         else
         {
-            return ResetNotImplemented{};
+            return RESET_UNAVAILABLE;
         }
     }
 };

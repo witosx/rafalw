@@ -40,9 +40,10 @@ private:
             reset(m_generator);
     }
 
-    auto generatorReset() -> ResetOK
+    auto generatorReset()
     {
         reset(m_generator);
+        return RESET_OK;
     }
 };
 
@@ -87,10 +88,11 @@ private:
         }
     }
 
-    auto generatorReset() -> ResetOK
+    auto generatorReset()
     {
         reset(m_generator);
         m_count = 0;
+        return RESET_OK;
     }
 };
 

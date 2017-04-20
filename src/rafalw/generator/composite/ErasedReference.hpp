@@ -2,59 +2,19 @@
 #define RAFALW_GENERATOR_ERASEDREFERENCE_HPP_
 
 #include <rafalw/generator/Base.hpp>
-#include <rafalw/utils/FunctionPtr.hpp>
-#include <rafalw/utils/assert.hpp>
-#include <boost/optional.hpp>
 
 inline namespace rafalw {
 namespace generator {
-
-namespace detail {
-
-template<typename ElementT>
-struct ErasedReferenceElement
-{
-    ErasedReferenceElement() = default;
-    ErasedReferenceElement(ElementT&& e) :
-        m_data{ std::move(e) }
-    {}
-
-    auto data() const -> const ElementT*
-    {
-        return m_data.ptr();
-    }
-
-    boost::optional<ElementT> m_data;
-};
-
-template<typename ElementT>
-struct ErasedReferenceElement<const ElementT&>
-{
-    ErasedReferenceElement() = default;
-    ErasedReferenceElement(const ElementT& e) :
-        m_data{ &e }
-    {}
-
-    auto data() const -> const ElementT*
-    {
-        return m_data;
-    }
-
-    const ElementT* m_data{ nullptr };
-};
-
-} // namespace detail
 
 template<typename ElementT>
 class ErasedReference : private Base
 {
 public:
     template<typename GeneratorT, std::enable_if_t<!std::is_same<GeneratorT, ErasedReference<ElementT>>::value>* = nullptr>
-    ErasedReference(GeneratorT& generator) :
-        m_generator{ &generator },
-        m_fetch(fetch<GeneratorT>)
+    ErasedReference(GeneratorT& generator)
     {
-        generatorUpdate();
+        static_assert(sizeof(ImplBase) == sizeof(Impl<GeneratorT>));
+        new (m_implStorage) Impl<GeneratorT>{ &generator };
     }
 
 private:
@@ -62,41 +22,79 @@ private:
 
     using Element = ElementT;
 
-    template<typename GeneratorT>
-    static auto fetch(void* gen) -> detail::ErasedReferenceElement<Element>
+    class ImplBase
     {
-        rafalw_utils_assert(gen);
+    public:
+        ImplBase(void* generator) :
+            m_generator{ generator }
+        {}
 
-        auto& gen2 = *static_cast<GeneratorT*>(gen);
+        virtual auto done() const -> bool = 0;
+        virtual auto peek() const -> Element = 0;
+        virtual auto update() -> void = 0;
 
-        if (done(gen2))
-            return {};
+    protected:
+        void* m_generator;
+    };
 
-        const auto sg = utils::scope_guard([&gen2]{
-            update(gen2);
-        });
+    template<typename GeneratorT>
+    class Impl : public ImplBase
+    {
+    public:
+        using ImplBase::ImplBase;
 
-        return detail::ErasedReferenceElement<Element>{ peek(gen2) };
-    }
+        auto done() const -> bool override
+        {
+            return generator::done(get());
+        }
 
-    void* m_generator;
-    utils::FunctionPtr<detail::ErasedReferenceElement<Element>(void*)> m_fetch;
+        auto peek() const -> Element override
+        {
+            return generator::peek(get());
+        }
 
-    detail::ErasedReferenceElement<Element> m_element;
+        auto update() -> void override
+        {
+            generator::update(get());
+        }
+
+    private:
+        auto get() const -> const GeneratorT&
+        {
+            return *static_cast<const GeneratorT*>(ImplBase::m_generator);
+        }
+
+        auto get() -> GeneratorT&
+        {
+            return *static_cast<GeneratorT*>(ImplBase::m_generator);
+        }
+    };
+
+    alignas (ImplBase) std::uint8_t m_implStorage[sizeof(ImplBase)];
 
     auto generatorDone() const -> bool
     {
-        return !m_element.data();
+        return impl().done();
     }
 
     decltype(auto) generatorPeek() const
     {
-        return *m_element.data();
+        return impl().peek();
     }
 
     auto generatorUpdate() -> void
     {
-        m_element = m_fetch(m_generator);
+        impl().update();
+    }
+
+    auto impl() -> ImplBase&
+    {
+        return *reinterpret_cast<ImplBase*>(&m_implStorage[0]);
+    }
+
+    auto impl() const -> const ImplBase&
+    {
+        return *reinterpret_cast<const ImplBase*>(&m_implStorage[0]);
     }
 };
 

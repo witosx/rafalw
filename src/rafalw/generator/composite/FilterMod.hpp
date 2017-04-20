@@ -7,11 +7,11 @@ inline namespace rafalw {
 namespace generator {
 
 template<typename F>
-class ModifierFiltering : public ModifierBase<ModifierFiltering<F>>
+class FilterMod : public ModifierBase<FilterMod<F>>
 {
 public:
 	template<typename F2>
-	ModifierFiltering(F2&& f) :
+	FilterMod(F2&& f) :
 		m_function{ std::forward<F2>(f) }
 	{}
 
@@ -36,15 +36,15 @@ private:
 };
 
 template<typename F>
-auto modifier_filtering(F&& f) -> ModifierFiltering<std::remove_reference_t<F>>
+auto filter_mod(F&& f) -> FilterMod<std::remove_reference_t<F>>
 {
-	return ModifierFiltering<std::remove_reference_t<F>>{ std::forward<F>(f) };
+	return FilterMod<std::remove_reference_t<F>>{ std::forward<F>(f) };
 }
 
 template<typename G, typename F, require_instance<G> = nullptr>
-auto filter(G&& gen, F&& f) -> decltype(modified(std::forward<G>(gen), modifier_filtering(std::forward<F>(f))))
+auto filter(G&& gen, F&& f) -> decltype(modified(std::forward<G>(gen), filter_mod(std::forward<F>(f))))
 {
-    return modified(std::forward<G>(gen), modifier_filtering(std::forward<F>(f)));
+    return modified(std::forward<G>(gen), filter_mod(std::forward<F>(f)));
 }
 
 template<typename G, typename F, require_instance<G> = nullptr>

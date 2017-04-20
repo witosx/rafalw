@@ -7,11 +7,11 @@ inline namespace rafalw {
 namespace generator {
 
 template<typename F>
-class ModifierTransforming : public ModifierBase<ModifierTransforming<F>>
+class TransformMod : public ModifierBase<TransformMod<F>>
 {
 public:
 	template<typename F2>
-	ModifierTransforming(F2&& f) :
+	TransformMod(F2&& f) :
 		m_function{ std::forward<F2>(f) }
 	{}
 
@@ -30,15 +30,15 @@ private:
 };
 
 template<typename F>
-auto modifier_transforming(F&& f) -> ModifierTransforming<std::remove_reference_t<F>>
+auto transform_mod(F&& f) -> TransformMod<std::remove_reference_t<F>>
 {
-	return ModifierTransforming<std::remove_reference_t<F>>{ std::forward<F>(f) };
+	return TransformMod<std::remove_reference_t<F>>{ std::forward<F>(f) };
 }
 
 template<typename G, typename F, require_instance<G> = nullptr>
-auto transform(G&& gen, F&& f) -> decltype(modified(std::forward<G>(gen), modifier_transforming(std::forward<F>(f))))
+auto transform(G&& gen, F&& f) -> decltype(modified(std::forward<G>(gen), transform_mod(std::forward<F>(f))))
 {
-    return modified(std::forward<G>(gen), modifier_transforming(std::forward<F>(f)));
+    return modified(std::forward<G>(gen), transform_mod(std::forward<F>(f)));
 }
 
 template<typename G, typename F, require_instance<G> = nullptr>

@@ -48,11 +48,11 @@ private:
         {
             m_count = 0;
             reset(m_generator);
-            return;
+            return RESET_OK;
         }
         else
         {
-            return ResetNotImplemented{};
+            return RESET_UNAVAILABLE;
         }
     }
 };

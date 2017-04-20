@@ -46,18 +46,18 @@ private:
 
     auto generatorReset()
     {
-        constexpr auto ok = std::conjunction<std::bool_constant<has_reset<GeneratorsT>>...>::value;
+        constexpr auto ok = std::conjunction<HasReset<GeneratorsT>...>::value;
 
         if constexpr (ok)
         {
             utils::static_foreach(m_generators, [](auto& gen){
                 reset(gen);
             });
-            return;
+            return RESET_OK;
         }
         else
         {
-            return ResetNotImplemented{};
+            return RESET_UNAVAILABLE;
         }
     }
 };

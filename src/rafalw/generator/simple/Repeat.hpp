@@ -36,9 +36,9 @@ private:
         // nothing to do
     }
 
-    auto generatorReset() -> void
+    auto generatorReset()
     {
-        // nothing to do
+        return RESET_OK;
     }
 };
 

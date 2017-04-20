@@ -44,9 +44,10 @@ private:
         m_current += m_step;
     }
 
-    auto generatorReset() -> void
+    auto generatorReset()
     {
         m_current = m_begin;
+        return RESET_OK;
     }
 };
 

@@ -10,15 +10,18 @@ namespace generator {
 
 struct ConstructTag {};
 
-struct ResetNotImplemented {};
-using ResetOK = void;
+struct ResetUnavailable : public std::false_type {};
+struct ResetOK : public std::true_type {};
+
+static constexpr auto RESET_OK = ResetOK{};
+static constexpr auto RESET_UNAVAILABLE = ResetUnavailable{};
 
 struct Base
 {
 protected:
     auto generatorReset()
     {
-        return ResetNotImplemented{};
+        return RESET_UNAVAILABLE;
     }
 };
 
@@ -47,7 +50,7 @@ public:
     static auto reset(T& g) -> decltype(g.generatorReset())
     {
         using Res = decltype(g.generatorReset());
-        static_assert(std::is_same<Res, ResetOK>::value || std::is_same<Res, ResetNotImplemented>::value);
+        static_assert(std::is_same<Res, ResetOK>::value || std::is_same<Res, ResetUnavailable>::value);
 
         return g.generatorReset();
     }
@@ -89,12 +92,15 @@ constexpr auto try_reset(G& g) -> decltype(BaseAccess::reset(g))
 }
 
 template<typename G, require_instance<G> = nullptr>
-constexpr auto has_reset = std::is_same<decltype(try_reset(std::declval<G&>())), ResetOK>::value;
+using HasReset = std::is_same<decltype(try_reset(std::declval<G&>())), ResetOK>;
+
+template<typename G>
+constexpr auto has_reset = HasReset<G>::value;
 
 template<typename G, require_instance<G> = nullptr, std::enable_if_t<has_reset<G>>* = nullptr>
 auto reset(G& g) -> void
 {
-    return BaseAccess::reset(g);
+    try_reset(g);
 }
 
 template<typename G, require_instance<G> = nullptr>
@@ -106,8 +112,7 @@ auto valid(const G& g) -> bool
 template<typename G, require_instance<G> = nullptr>
 auto next(G& g) -> std::remove_reference_t<decltype(peek(g))>
 {
-    const auto deferred_update = utils::scope_guard([&g]{ update(g); });
-
+    const auto sg = utils::scope_guard([&g]{ update(g); });
     return peek(g);
 }
 
