@@ -32,7 +32,7 @@ private:
         return !(m_current < m_end);
     }
 
-    auto generatorPeek() const -> Index
+    auto generatorPeek() const -> const Index&
     {
         return m_current;
     }
@@ -61,9 +61,10 @@ inline auto sequence(Index end) -> decltype(sequence(Index{ 0 }, end))
     return sequence(Index{ 0 }, end);
 }
 
-inline auto sequence() -> decltype(sequence(std::numeric_limits<std::size_t>::max()))
+template<typename Index = std::size_t>
+inline auto sequence() -> decltype(sequence(std::numeric_limits<Index>::max()))
 {
-    return sequence(std::numeric_limits<std::size_t>::max());
+    return sequence(std::numeric_limits<Index>::max());
 }
 
 } // namespace generator

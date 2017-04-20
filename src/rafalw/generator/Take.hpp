@@ -26,7 +26,7 @@ private:
 
     auto generatorDone() const -> bool
     {
-        return m_count == 0;
+        return done(m_generator) || m_count == 0;
     }
 
     decltype(auto) generatorPeek() const

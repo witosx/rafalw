@@ -38,7 +38,7 @@ private:
 };
 
 template<typename GeneratorT>
-auto ref(GeneratorT& generator) -> Reference<GeneratorT>
+auto reference(GeneratorT& generator) -> Reference<GeneratorT>
 {
     return Reference<GeneratorT>{ generator };
 }

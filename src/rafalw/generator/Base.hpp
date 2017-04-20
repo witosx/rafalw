@@ -15,7 +15,7 @@ template<typename T>
 using is_instance_t = typename std::is_base_of<Base, T>::type;
 
 template<typename T>
-constexpr auto is_instance = is_instance_t<T>::value;
+constexpr auto is_instance = is_instance_t<std::decay_t<T>>::value;
 
 template<typename T>
 using require_instance = std::enable_if_t<is_instance<T>, std::nullptr_t>;

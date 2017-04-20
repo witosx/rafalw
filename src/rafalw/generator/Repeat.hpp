@@ -26,12 +26,13 @@ private:
         return false;
     }
 
-    decltype(auto) generatorPeek() const
+    auto generatorPeek() const -> const Value&
     {
         return m_value;
     }
 
-    auto generatorUpdate() -> void {}
+    auto generatorUpdate() -> void
+    {}
 };
 
 template<typename Value>
