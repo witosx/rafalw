@@ -48,23 +48,37 @@ private:
     }
 };
 
+
 template<typename IteratorT, typename IteratorEndT>
 auto view(IteratorT begin, IteratorEndT end) -> View<IteratorT, IteratorEndT>
 {
-    return View<IteratorT, IteratorEndT>{ begin, end };
+    return View<IteratorT, IteratorEndT>{ std::move(begin), std::move(end) };
 }
 
 template<typename RangeT>
-auto view(const RangeT& range) -> decltype(view(begin(range), end(range)))
+auto view(RangeT&& range) -> decltype(view(begin(range), end(range)))
 {
     return view(begin(range), end(range));
 }
 
 template<typename RangeT>
-auto rview(const RangeT& range) -> decltype(view(rbegin(range), rend(range)))
+auto reversed_view(RangeT&& range) -> decltype(view(rbegin(range), rend(range)))
 {
     return view(rbegin(range), rend(range));
 }
+
+template<typename RangeT>
+auto const_view(RangeT&& range) -> decltype(view(static_cast<std::add_const_t<std::remove_reference_t<RangeT>>&>(range)))
+{
+    return view(static_cast<std::add_const_t<std::remove_reference_t<RangeT>>&>(range));
+}
+
+template<typename RangeT>
+auto const_reversed_view(RangeT&& range) -> decltype(reversed_view(static_cast<std::add_const_t<std::remove_reference_t<RangeT>>&>(range)))
+{
+    return reversed_view(static_cast<std::add_const_t<std::remove_reference_t<RangeT>>&>(range));
+}
+
 
 } // namespace generator
 } // namespace rafalw

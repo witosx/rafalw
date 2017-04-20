@@ -38,7 +38,7 @@ private:
     };
 
     template<typename GeneratorT>
-    class Impl : public ImplBase
+    class Impl final : public ImplBase
     {
     public:
         using ImplBase::ImplBase;
@@ -77,7 +77,7 @@ private:
         return impl().done();
     }
 
-    decltype(auto) generatorPeek() const
+    auto generatorPeek() const -> Element
     {
         return impl().peek();
     }
