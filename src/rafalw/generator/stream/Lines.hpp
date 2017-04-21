@@ -1,33 +1,27 @@
-#ifndef RAFALW_STREAMS_LINES_HPP_
-#define RAFALW_STREAMS_LINES_HPP_
+#ifndef RAFALW_GENERATOR_STREAM_LINES_HPP_
+#define RAFALW_GENERATOR_STREAM_LINES_HPP_
 
 #include <rafalw/generator/Base.hpp>
-#include <rafalw/utils/Error.hpp>
 #include <string>
 #include <istream>
 
 inline namespace rafalw {
-namespace streams {
+namespace generator {
+namespace stream {
 
-template<typename CharT>
-class Lines : private generator::Base
+template<typename CharT = char>
+class Lines : private Base
 {
 public:
-	using Char = CharT;
-	using Stream = std::basic_istream<Char>;
-	using String = std::basic_string<Char>;
-
-	class Error : public utils::Error
-	{
-	public:
-		using utils::Error::Error;
-	};
+    using Char = CharT;
+    using Stream = std::basic_istream<Char>;
+    using String = std::basic_string<Char>;
 
     Lines(Stream& stream, Char sep = '\n') :
         m_stream{ stream },
-		m_separator{ sep }
+        m_separator{ sep }
     {
-    	generatorUpdate();
+        generatorUpdate();
     }
 
 private:
@@ -45,24 +39,22 @@ private:
     auto generatorUpdate() -> void
     {
         getline(m_stream, m_line, m_separator);
-
-        if (!m_stream && !m_stream.eof())
-        	throw Error{ "Lines: read error"};
     }
 
     auto generatorDone() const -> bool
     {
-    	return m_stream.fail() || m_stream.bad();
+        return m_stream.fail() || m_stream.bad();
     }
 };
 
 template<typename Char>
 auto lines(std::basic_istream<Char>& stream, Char sep = '\n') -> Lines<Char>
 {
-	return Lines<Char>{ stream, sep };
+    return Lines<Char>{ stream, sep };
 }
 
-} // namespace streams
+} // namespace stream
+} // namespace generator
 } // namespace rafalw
 
-#endif // RAFALW_STREAMS_LINES_HPP_
+#endif // RAFALW_GENERATOR_STREAM_LINES_HPP_
