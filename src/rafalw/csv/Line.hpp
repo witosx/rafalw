@@ -3,9 +3,9 @@
 
 #include <rafalw/csv/common.hpp>
 #include <rafalw/csv/Error.hpp>
-#include <rafalw/utils/demangle.hpp>
-#include <rafalw/strings/Tokens.hpp>
+#include <rafalw/generator/string/Tokens.hpp>
 #include <rafalw/strings/parse.hpp>
+#include <rafalw/utils/demangle.hpp>
 #include <string>
 #include <sstream>
 #include <vector>
@@ -42,7 +42,7 @@ public:
         m_filename{ filename },
         m_number{ lineno }
     {
-        for (auto&& token: strings::tokens(m_line, delimiters))
+        for (auto&& token: generator::string::tokens(m_line, delimiters))
         {
             if (ep == Empty::IGNORE && token.empty())
                 continue;
