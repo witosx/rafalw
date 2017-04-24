@@ -6,17 +6,17 @@ namespace generator {
 
 class IteratorEnd {};
 
-template<typename G>
+template<typename GeneratorT>
 class Iterator
 {
 public:
-    using Generator = G;
+    using Generator = GeneratorT;
 
     explicit Iterator(Generator& generator) :
         m_generator{ &generator }
     {}
 
-    auto operator ++() -> Iterator<G>&
+    auto operator ++() -> Iterator&
     {
         update(*m_generator);
         return *this;
@@ -27,7 +27,7 @@ public:
         return peek(*m_generator);
     }
 
-    auto operator !=(const IteratorEnd&) const -> bool
+    auto operator !=(IteratorEnd) const -> bool
     {
         return !done(*m_generator);
     }

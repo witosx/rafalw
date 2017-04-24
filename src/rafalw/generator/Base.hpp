@@ -10,8 +10,17 @@ namespace generator {
 
 struct ConstructTag {};
 
-struct ResetUnavailable : public std::false_type {};
-struct ResetOK : public std::true_type {};
+enum class Reset
+{
+    OK,
+    UNAVAILABLE
+};
+
+template<Reset R>
+struct ResetTag {};
+
+using ResetOK = ResetTag<Reset::OK>;
+using ResetUnavailable = ResetTag<Reset::UNAVAILABLE>;
 
 static constexpr auto RESET_OK = ResetOK{};
 static constexpr auto RESET_UNAVAILABLE = ResetUnavailable{};
