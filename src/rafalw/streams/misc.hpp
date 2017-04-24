@@ -1,7 +1,6 @@
 #ifndef RAFALW_STREAMS_MISC_HPP_
 #define RAFALW_STREAMS_MISC_HPP_
 
-#include <boost/iterator/iterator_facade.hpp>
 #include <rafalw/utils/static.hpp>
 #include <rafalw/utils/assert.hpp>
 #include <istream>

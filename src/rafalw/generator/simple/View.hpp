@@ -2,6 +2,7 @@
 #define RAFALW_GENERATOR_VIEW_HPP_
 
 #include <rafalw/generator/Base.hpp>
+#include <iterator>
 
 inline namespace rafalw {
 namespace generator {
@@ -13,9 +14,9 @@ public:
     using Iterator = IteratorT;
     using IteratorEnd = IteratorEndT;
 
-    View(const Iterator begin, const IteratorEnd end) :
-        m_begin{ begin },
-        m_end{ end }
+    View(Iterator begin, IteratorEnd end) :
+        m_begin{ std::move(begin) },
+        m_end{ std::move(end) }
     {}
 
 private:
@@ -43,8 +44,15 @@ private:
 
     auto generatorReset()
     {
-        m_current = m_begin;
-        return RESET_OK;
+        if constexpr (!std::is_same<typename std::iterator_traits<Iterator>::iterator_category, std::input_iterator_tag>::value)
+        {
+            m_current = m_begin;
+            return RESET_OK;
+        }
+        else
+        {
+            return RESET_UNAVAILABLE;
+        }
     }
 };
 
@@ -72,13 +80,13 @@ auto reversed_view(RangeT&& range)
 }
 
 template<typename RangeT>
-auto const_view(RangeT&& range) -> decltype(view(static_cast<std::add_const_t<std::remove_reference_t<RangeT>>&>(range)))
+auto const_view(RangeT&& range)
 {
     return view(static_cast<std::add_const_t<std::remove_reference_t<RangeT>>&>(range));
 }
 
 template<typename RangeT>
-auto const_reversed_view(RangeT&& range) -> decltype(reversed_view(static_cast<std::add_const_t<std::remove_reference_t<RangeT>>&>(range)))
+auto const_reversed_view(RangeT&& range)
 {
     return reversed_view(static_cast<std::add_const_t<std::remove_reference_t<RangeT>>&>(range));
 }
