@@ -117,15 +117,15 @@ auto next(G& g) -> std::remove_reference_t<decltype(peek(g))>
 }
 
 template<typename G, require_instance<G> = nullptr>
-auto begin(G& g) -> decltype(iterator(g, false))
+auto begin(G& g) -> Iterator<G>
 {
-    return iterator(g, false);
+    return Iterator<G>{ g };
 }
 
 template<typename G, require_instance<G> = nullptr>
-auto end(G& g) -> decltype(iterator(g, true))
+auto end(G&) -> IteratorEnd
 {
-	return iterator(g, true);
+	return IteratorEnd{};
 }
 
 } // namespace generator
