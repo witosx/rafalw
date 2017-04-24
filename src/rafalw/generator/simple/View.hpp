@@ -56,14 +56,18 @@ auto view(IteratorT begin, IteratorEndT end) -> View<IteratorT, IteratorEndT>
 }
 
 template<typename RangeT>
-auto view(RangeT&& range) -> decltype(view(begin(range), end(range)))
+auto view(RangeT&& range)
 {
+    using std::begin;
+    using std::end;
     return view(begin(range), end(range));
 }
 
 template<typename RangeT>
-auto reversed_view(RangeT&& range) -> decltype(view(rbegin(range), rend(range)))
+auto reversed_view(RangeT&& range)
 {
+    using std::rbegin;
+    using std::rend;
     return view(rbegin(range), rend(range));
 }
 

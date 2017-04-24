@@ -81,8 +81,8 @@ template<typename T>
 class StreamRange
 {
 public:
-    StreamRange(const T& range) :
-        m_range{ range }
+    StreamRange(T range) :
+        m_range{ static_cast<T>(range) }
     {}
 
     friend auto operator <<(std::ostream& os, const StreamRange& obj) -> std::ostream&
@@ -99,13 +99,13 @@ public:
     }
 
 private:
-    const T& m_range;
+    T m_range;
 };
 
 template<typename T>
-auto stream_range(const T& range) -> StreamRange<T>
+auto stream_range(T&& range) -> StreamRange<T&&>
 {
-    return StreamRange<T>{ range };
+    return StreamRange<T&&>{ std::forward<T>(range) };
 }
 
 template<typename... Args>
