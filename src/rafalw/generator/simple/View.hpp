@@ -91,7 +91,6 @@ auto const_reversed_view(RangeT&& range)
     return reversed_view(static_cast<std::add_const_t<std::remove_reference_t<RangeT>>&>(range));
 }
 
-
 } // namespace generator
 } // namespace rafalw
 

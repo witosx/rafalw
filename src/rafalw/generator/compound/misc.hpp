@@ -1,8 +1,8 @@
-#ifndef RAFALW_GENERATOR_COMPOSITE_MISC_HPP_
-#define RAFALW_GENERATOR_COMPOSITE_MISC_HPP_
+#ifndef RAFALW_GENERATOR_COMPOUND_MISC_HPP_
+#define RAFALW_GENERATOR_COMPOUND_MISC_HPP_
 
 #include <rafalw/generator/simple/Sequence.hpp>
-#include <rafalw/generator/composite/Zip.hpp>
+#include <rafalw/generator/compound/Zip.hpp>
 
 inline namespace rafalw {
 namespace generator {
@@ -22,4 +22,4 @@ auto enumerate(Generator&& g)
 } // namespace generator
 } // namespace rafalw
 
-#endif // RAFALW_GENERATOR_COMPOSITE_MISC_HPP_
+#endif // RAFALW_GENERATOR_COMPOUND_MISC_HPP_
