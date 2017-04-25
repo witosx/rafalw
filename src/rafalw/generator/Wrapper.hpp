@@ -1,6 +1,8 @@
 #ifndef RAFALW_GENERATOR_WRAPPER_HPP_
 #define RAFALW_GENERATOR_WRAPPER_HPP_
 
+#include <type_traits>
+
 inline namespace rafalw {
 namespace generator {
 
@@ -34,6 +36,12 @@ public:
         return RESET_UNAVAILABLE;
     }
 };
+
+template<typename T>
+using IsWrapper = std::is_base_of<Wrapper, T>;
+
+template<typename T>
+static constexpr auto is_wrapper = IsWrapper<T>::value;
 
 } // namespace generator
 } // namespace rafalw

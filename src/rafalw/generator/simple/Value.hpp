@@ -7,26 +7,26 @@ inline namespace rafalw {
 namespace generator {
 
 template<typename ValueT>
-class Repeat : private Base
+class Value : private Base
 {
 public:
-    using Value = ValueT;
+    using Element = ValueT;
 
-    explicit Repeat(const Value& value) :
+    explicit Value(const Element& value) :
         m_value{ value }
     {}
 
 private:
     friend class BaseAccess;
 
-    Value m_value;
+    Element m_value;
 
     auto generatorDone() const -> bool
     {
         return false;
     }
 
-    auto generatorPeek() const -> const Value&
+    auto generatorPeek() const -> const Element&
     {
         return m_value;
     }
@@ -42,10 +42,10 @@ private:
     }
 };
 
-template<typename Value>
-auto repeat(const Value& value) -> Repeat<Value>
+template<typename ValueT>
+auto value(const ValueT& value) -> Value<ValueT>
 {
-    return Repeat<Value>{ value };
+    return Value<ValueT>{ value };
 }
 
 } // namespace generator

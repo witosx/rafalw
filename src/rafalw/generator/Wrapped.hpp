@@ -61,19 +61,19 @@ private:
     }
 };
 
-template<typename GeneratorT, typename WrapperT, require_instance<GeneratorT>* = nullptr>
+template<typename GeneratorT, typename WrapperT, std::enable_if_t<is_generator<GeneratorT> && is_wrapper<WrapperT>>* = nullptr>
 auto wrap(GeneratorT&& genertor, WrapperT&& wrapper) -> Wrapped<std::decay_t<GeneratorT>, std::decay_t<WrapperT>>
 {
     return Wrapped<std::decay_t<GeneratorT>, std::decay_t<WrapperT>>{ std::forward<GeneratorT>(genertor), std::forward<WrapperT>(wrapper) };
 }
 
-template<typename GeneratorT, typename WrapperT, require_instance<GeneratorT>* = nullptr>
+template<typename GeneratorT, typename WrapperT, std::enable_if_t<is_generator<GeneratorT> && is_wrapper<WrapperT>>* = nullptr>
 auto operator |(GeneratorT&& genertor, WrapperT&& wrapper) -> decltype(wrap(std::forward<GeneratorT>(genertor), std::forward<WrapperT>(wrapper)))
 {
     return wrap(std::forward<GeneratorT>(genertor), std::forward<WrapperT>(wrapper));
 }
 
-template<typename IterableT, typename WrapperT, std::enable_if_t<!is_instance<IterableT>>* = nullptr>
+template<typename IterableT, typename WrapperT, std::enable_if_t<!is_generator<IterableT> && is_wrapper<WrapperT>>* = nullptr>
 auto operator |(IterableT&& iterable, WrapperT&& wrapper) -> decltype(wrap(view(std::forward<IterableT>(iterable)), std::forward<WrapperT>(wrapper)))
 {
     return wrap(view(std::forward<IterableT>(iterable)), std::forward<WrapperT>(wrapper));

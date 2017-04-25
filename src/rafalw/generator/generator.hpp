@@ -2,7 +2,7 @@
 #define RAFALW_GENERATOR_GENERATOR_HPP_
 
 #include <rafalw/generator/simple/Sequence.hpp>
-#include <rafalw/generator/simple/Repeat.hpp>
+#include <rafalw/generator/simple/Value.hpp>
 #include <rafalw/generator/simple/View.hpp>
 #include <rafalw/generator/simple/Empty.hpp>
 #include <rafalw/generator/simple/Function.hpp>

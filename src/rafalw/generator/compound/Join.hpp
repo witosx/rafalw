@@ -108,7 +108,7 @@ auto join(GeneratorT1&& g1, GeneratorT2&& g2) -> Join<std::decay_t<GeneratorT1>,
 }
 
 template<typename GeneratorT1, typename GeneratorT2, require_instance<GeneratorT1> = nullptr, require_instance<GeneratorT2> = nullptr>
-auto operator +(GeneratorT1&& g1, GeneratorT2&& g2) -> decltype(join(std::forward<GeneratorT1>(g1), std::forward<GeneratorT2>(g2)))
+auto operator |(GeneratorT1&& g1, GeneratorT2&& g2) -> decltype(join(std::forward<GeneratorT1>(g1), std::forward<GeneratorT2>(g2)))
 {
     return join(std::forward<GeneratorT1>(g1), std::forward<GeneratorT2>(g2));
 }
