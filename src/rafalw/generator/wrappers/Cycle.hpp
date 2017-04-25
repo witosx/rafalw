@@ -67,12 +67,12 @@ private:
     std::size_t m_count = 0;
 };
 
-auto cycle() -> Cycle
+inline auto cycle() -> Cycle
 {
     return Cycle{};
 }
 
-auto cycle(std::size_t n) -> CycleN
+inline auto cycle(std::size_t n) -> CycleN
 {
     return CycleN{ n };
 }
