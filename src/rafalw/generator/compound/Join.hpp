@@ -78,8 +78,8 @@ private:
 
     auto generatorReset()
     {
-        static constexpr auto RES1 = decltype(try_reset(m_generator1))::value;
-        static constexpr auto RES2 = decltype(try_reset(m_generator2))::value;
+        static constexpr auto RES1 = has_reset<Generator1>;
+        static constexpr auto RES2 = has_reset<Generator2>;
         static constexpr auto RES = RES1 && RES2;
 
         if (RES)

@@ -44,15 +44,12 @@ private:
 
     auto generatorReset()
     {
-        if constexpr (!std::is_same<typename std::iterator_traits<Iterator>::iterator_category, std::input_iterator_tag>::value)
-        {
+        static constexpr auto RES = !std::is_same<typename std::iterator_traits<Iterator>::iterator_category, std::input_iterator_tag>::value;
+
+        if (RES)
             m_current = m_begin;
-            return RESET_OK;
-        }
-        else
-        {
-            return RESET_UNAVAILABLE;
-        }
+
+        return ResetTag<RES>{};
     }
 };
 
