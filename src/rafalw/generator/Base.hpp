@@ -13,18 +13,15 @@ struct ConstructTag {};
 template<bool OK>
 struct ResetTag : public std::bool_constant<OK> {};
 
-using ResetOK = ResetTag<true>;
-using ResetUnavailable = ResetTag<false>;
-
-static constexpr auto RESET_OK = ResetOK{};
-static constexpr auto RESET_UNAVAILABLE = ResetUnavailable{};
+template<bool OK>
+static constexpr auto RESET_TAG = ResetTag<OK>{};
 
 struct Base
 {
 protected:
     auto generatorReset()
     {
-        return RESET_UNAVAILABLE;
+        return RESET_TAG<false>;
     }
 };
 
@@ -52,9 +49,6 @@ public:
     template<typename T>
     static auto reset(T& g) -> decltype(g.generatorReset())
     {
-        using Res = decltype(g.generatorReset());
-        static_assert(std::is_same<Res, ResetOK>::value || std::is_same<Res, ResetUnavailable>::value);
-
         return g.generatorReset();
     }
 };
@@ -95,12 +89,12 @@ constexpr auto try_reset(G& g) -> decltype(BaseAccess::reset(g))
 }
 
 template<typename G, require_instance<G> = nullptr>
-using HasReset = std::is_same<decltype(try_reset(std::declval<G&>())), ResetOK>;
+using reset_tag = decltype(try_reset(std::declval<G&>()));
 
 template<typename G>
-constexpr auto has_reset = HasReset<G>::value;
+constexpr auto reset_ok = reset_tag<G>::value;
 
-template<typename G, require_instance<G> = nullptr, std::enable_if_t<has_reset<G>>* = nullptr>
+template<typename G, require_instance<G> = nullptr, std::enable_if_t<reset_ok<G>>* = nullptr>
 auto reset(G& g) -> void
 {
     try_reset(g);

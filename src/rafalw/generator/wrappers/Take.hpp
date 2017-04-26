@@ -10,7 +10,7 @@ namespace generator {
 class Take : public Wrapper
 {
 public:
-    Take(std::size_t n) :
+    explicit Take(std::size_t n) :
         m_max{ n }
     {}
 
@@ -30,7 +30,7 @@ public:
     auto wrapperReset()
     {
         m_count = 0;
-        return RESET_OK;
+        return RESET_TAG<true>;
     }
 
 private:

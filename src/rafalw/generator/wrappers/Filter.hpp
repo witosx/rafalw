@@ -11,7 +11,7 @@ template<typename FunctionT>
 class Filter : public Wrapper
 {
 public:
-	template<typename F>
+	template<typename F, std::enable_if_t<!std::is_same<std::decay_t<F>, Filter<FunctionT>>::value>* = nullptr>
 	Filter(F&& f) :
 		m_function{ std::forward<F>(f) }
 	{}
@@ -31,12 +31,10 @@ public:
 
     auto wrapperReset()
     {
-        return RESET_OK;
+        return RESET_TAG<true>;
     }
 
 private:
-	friend class BaseAccess;
-
 	using Function = FunctionT;
 
 	Function m_function;

@@ -2,6 +2,7 @@
 #define RAFALW_GENERATOR_JOIN_HPP_
 
 #include <rafalw/generator/Base.hpp>
+#include <rafalw/generator/simple/View.hpp>
 
 inline namespace rafalw {
 namespace generator {
@@ -40,7 +41,9 @@ public:
     Join(G1&& g1, G2&& g2) :
         m_generator1{ std::forward<G1>(g1) },
         m_generator2{ std::forward<G2>(g2) }
-    {}
+    {
+        currentInit();
+    }
 
 private:
     friend class BaseAccess;
@@ -62,41 +65,64 @@ private:
 
     auto generatorPeek() const -> Value
     {
-        if (m_index == 0)
-            return peek(m_generator1);
-        else
-            return peek(m_generator2);
+        return currentApply([](const auto& g) -> Value {
+            return peek(g);
+        });
     }
 
     auto generatorUpdate() -> void
     {
-        if (m_index == 0)
-            updateGenerator(m_generator1);
-        else
-            updateGenerator(m_generator2);
+        currentApply([this](auto& g) {
+            update(g);
+            currentInit();
+        });
     }
 
     auto generatorReset()
     {
-        static constexpr auto RES1 = has_reset<Generator1>;
-        static constexpr auto RES2 = has_reset<Generator2>;
-        static constexpr auto RES = RES1 && RES2;
+        static constexpr auto OK1 = reset_ok<Generator1>;
+        static constexpr auto OK2 = reset_ok<Generator2>;
+        static constexpr auto OK = OK1 && OK2;
 
-        if (RES)
+        if (OK)
         {
             try_reset(m_generator1);
             try_reset(m_generator2);
             m_index = 0;
+            currentInit();
         }
 
-        return ResetTag<RES>{};
+        return RESET_TAG<OK>;
     }
 
-    template<typename G>
-    auto updateGenerator(G& g) -> void
+    template<typename F>
+    decltype(auto) currentApply(F&& f)
     {
-        update(g);
-        if (done(g))
+        if (m_index == 0)
+            return f(m_generator1);
+        else
+            return f(m_generator2);
+    }
+
+    template<typename F>
+    decltype(auto) currentApply(F&& f) const
+    {
+        if (m_index == 0)
+            return f(m_generator1);
+        else
+            return f(m_generator2);
+    }
+
+    auto currentDone() const -> bool
+    {
+        return currentApply([](const auto& g) {
+            return done(g);
+        });
+    }
+
+    auto currentInit() -> void
+    {
+        while (currentDone() && !generatorDone())
             m_index++;
     }
 };
@@ -107,10 +133,22 @@ auto join(GeneratorT1&& g1, GeneratorT2&& g2) -> Join<std::decay_t<GeneratorT1>,
     return Join<std::decay_t<GeneratorT1>, std::decay_t<GeneratorT2>>{ std::forward<GeneratorT1>(g1), std::forward<GeneratorT2>(g2) };
 }
 
-template<typename GeneratorT1, typename GeneratorT2, require_instance<GeneratorT1> = nullptr, require_instance<GeneratorT2> = nullptr>
+template<typename GeneratorT1, typename GeneratorT2, std::enable_if_t<is_generator<GeneratorT1> && is_generator<GeneratorT2>>* = nullptr>
 auto operator |(GeneratorT1&& g1, GeneratorT2&& g2) -> decltype(join(std::forward<GeneratorT1>(g1), std::forward<GeneratorT2>(g2)))
 {
     return join(std::forward<GeneratorT1>(g1), std::forward<GeneratorT2>(g2));
+}
+
+template<typename IterableT, typename GeneratorT, std::enable_if_t<!is_generator<IterableT> && !is_wrapper<IterableT> && is_generator<GeneratorT>>* = nullptr>
+auto operator |(IterableT&& iterable, GeneratorT&& gen) -> decltype(generator::view(std::forward<IterableT>(iterable)) | std::forward<GeneratorT>(gen))
+{
+    return generator::view(std::forward<IterableT>(iterable)) | std::forward<GeneratorT>(gen);
+}
+
+template<typename IterableT, typename GeneratorT, std::enable_if_t<!is_generator<IterableT> && !is_wrapper<IterableT> && is_generator<GeneratorT>>* = nullptr>
+auto operator |(GeneratorT&& gen, IterableT&& iterable) -> decltype(std::forward<GeneratorT>(gen) | generator::view(std::forward<IterableT>(iterable)))
+{
+    return std::forward<GeneratorT>(gen) | generator::view(std::forward<IterableT>(iterable));
 }
 
 } // namespace generator

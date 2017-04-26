@@ -46,12 +46,12 @@ private:
 
     auto generatorReset()
     {
-        static constexpr auto RES = has_reset<Generator>;
+        static constexpr auto RES = reset_ok<Generator>;
 
         if (RES && m_generator)
             try_reset(*m_generator);
 
-        return ResetTag<RES>{};
+        return RESET_TAG<RES>;
     }
 };
 

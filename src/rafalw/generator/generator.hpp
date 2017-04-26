@@ -12,8 +12,8 @@
 #include <rafalw/generator/wrappers/Cycle.hpp>
 #include <rafalw/generator/wrappers/Take.hpp>
 #include <rafalw/generator/wrappers/Filter.hpp>
-#include <rafalw/generator/wrappers/Transform.hpp>
-#include <rafalw/generator/compound/misc.hpp>
+#include <rafalw/generator/wrappers/Apply.hpp>
+#include <rafalw/generator/compound/Enumerate.hpp>
 #include <rafalw/generator/compound/Zip.hpp>
 #include <rafalw/generator/compound/Join.hpp>
 #include <rafalw/generator/stream/Lines.hpp>

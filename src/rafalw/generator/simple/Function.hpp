@@ -51,7 +51,7 @@ private:
         new (&m_func) Func{ m_funcOrig };
 
         generatorUpdate();
-        return RESET_OK;
+        return RESET_TAG<true>;
     }
 };
 

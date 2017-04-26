@@ -38,7 +38,7 @@ private:
 
     auto generatorReset()
     {
-        return RESET_OK;
+        return RESET_TAG<true>;
     }
 };
 

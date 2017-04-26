@@ -64,7 +64,7 @@ private:
         m_string = m_stringFull;
         m_token = {};
         m_count = 0;
-        return RESET_OK;
+        return RESET_TAG<true>;
     }
 };
 

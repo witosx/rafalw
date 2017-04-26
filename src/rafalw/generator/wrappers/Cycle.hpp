@@ -27,14 +27,14 @@ public:
 
     auto wrapperReset()
     {
-        return RESET_OK;
+        return RESET_TAG<true>;
     }
 };
 
 class CycleN : public Wrapper
 {
 public:
-    CycleN(std::size_t n) :
+    explicit CycleN(std::size_t n) :
         m_max{ n }
     {}
 
@@ -56,10 +56,10 @@ public:
         }
     }
 
-    auto generatorReset()
+    auto wrapperReset()
     {
         m_count = 0;
-        return RESET_OK;
+        return RESET_TAG<true>;
     }
 
 private:

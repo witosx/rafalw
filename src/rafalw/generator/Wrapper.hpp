@@ -33,7 +33,7 @@ public:
 
     auto wrapperReset()
     {
-        return RESET_UNAVAILABLE;
+        return RESET_TAG<false>;
     }
 };
 

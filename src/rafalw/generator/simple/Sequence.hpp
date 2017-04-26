@@ -47,7 +47,7 @@ private:
     auto generatorReset()
     {
         m_current = m_begin;
-        return RESET_OK;
+        return RESET_TAG<true>;
     }
 };
 
