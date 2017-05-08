@@ -1,6 +1,7 @@
 #ifndef RAFALW_TUPLE_HPP_
 #define RAFALW_TUPLE_HPP_
 
+#include <rafalw/utils/static.hpp>
 #include <functional>
 #include <utility>
 #include <tuple>
@@ -26,6 +27,14 @@ constexpr decltype(auto) apply(FunctionT&& function, TupleT&& tuple)
         std::forward<TupleT>(tuple),
         std::make_index_sequence<std::tuple_size<std::decay_t<TupleT>>::value>{}
     );
+}
+
+template<typename RetT, typename TupleT, typename FunctionT>
+constexpr decltype(auto) element_apply(FunctionT&& function, TupleT&& tuple, std::size_t index)
+{
+    return utils::static_integral<RetT, std::size_t, 0, std::tuple_size<std::decay_t<TupleT>>::value>(index, [&](auto ic){
+        return function(std::get<ic()>(tuple));
+    });
 }
 
 } // namespace tuple

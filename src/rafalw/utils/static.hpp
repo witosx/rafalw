@@ -1,6 +1,7 @@
 #ifndef RAFALW_UTILS_STATIC_HPP_
 #define RAFALW_UTILS_STATIC_HPP_
 
+#include <stdexcept>
 #include <tuple>
 #include <type_traits>
 #include <utility>
@@ -73,6 +74,22 @@ constexpr auto static_enumerate(T&& t, F&& f) -> void
 
     constexpr auto N = std::tuple_size<std::remove_reference_t<T2>>::value;
     static_for<std::size_t, 0, N>([&t,&f](auto i){ f(i, get<i()>(std::forward<T2>(t))); });
+}
+
+template<typename RetT, typename IndexT, IndexT BEGIN, IndexT END, typename F>
+constexpr auto static_integral(IndexT index, F&& handler) -> RetT
+{
+    if constexpr (BEGIN < END)
+    {
+        if (index == BEGIN)
+            return handler(std::integral_constant<IndexT, BEGIN>{});
+        else
+            return static_integral<RetT, IndexT, BEGIN + 1, END>(index, std::forward<F>(handler));
+    }
+    else
+    {
+        throw std::out_of_range{ "static_integral" };
+    }
 }
 
 } // namespace utils
