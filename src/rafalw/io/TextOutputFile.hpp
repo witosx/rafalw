@@ -6,27 +6,31 @@
 inline namespace rafalw {
 namespace io {
 
-class TextOutputFile : public OutputFile<TextOutputFile, std::ios_base::out>
+template<typename StreamT>
+class BasicTextOutputFile : public OutputFile<BasicTextOutputFile<StreamT>, StreamT, std::ios_base::out>
 {
 public:
     template<typename... Args>
     auto writeLine(const Args&... args) -> void
     {
-        write(args..., '\n');
+        Base::write(args..., '\n');
     }
 
 private:
-    using OutputFile<TextOutputFile, std::ios_base::out>::OutputFile;
+    using Base = OutputFile<BasicTextOutputFile<StreamT>, StreamT, std::ios_base::out>;
+    using Base::Base;
 
-    friend class OutputFile<TextOutputFile, std::ios_base::out>;
+    friend Base;
 
     template<typename Arg>
     auto writeImpl(const Arg& arg) -> void
     {
-        m_stream.setf(std::ios::fixed, std::ios::floatfield);
-        m_stream << arg;
+        Base::stream().setf(std::ios::fixed, std::ios::floatfield);
+        Base::stream() << arg;
     }
 };
+
+using TextOutputFile = BasicTextOutputFile<std::fstream>;
 
 } // namespace io
 } // namespace rafalw

@@ -30,6 +30,11 @@ private:
     int m_index;
 };
 
+inline auto fetch(const Line& line, const Column& column) -> const Line::StringView&
+{
+    return line.get(column.index());
+}
+
 } // namespace csv
 } // namespace rafalw
 

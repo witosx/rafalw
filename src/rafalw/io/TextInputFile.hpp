@@ -8,13 +8,14 @@
 inline namespace rafalw {
 namespace io {
 
-class TextInputFile : public InputFile<TextInputFile, std::ios_base::in>
+template<typename StreamT>
+class BasicTextInputFile : public InputFile<BasicTextInputFile<StreamT>, StreamT, std::ios_base::in>
 {
 public:
     class Lines : private generator::Base
     {
     public:
-        Lines(TextInputFile& input, char c) :
+        Lines(BasicTextInputFile& input, char c) :
             m_input{ &input },
             m_char{ c }
         {
@@ -24,7 +25,7 @@ public:
     private:
         friend class generator::BaseAccess;
 
-        TextInputFile* m_input;
+        BasicTextInputFile* m_input;
         char m_char;
 
         std::string m_line;
@@ -48,17 +49,17 @@ public:
 
     static constexpr auto DEFAULT_LINE_SEP = '\n';
 
-    using InputFile<TextInputFile, std::ios_base::in>::InputFile;
+    using InputFile<BasicTextInputFile, StreamT, std::ios_base::in>::InputFile;
 
     auto readLine(std::string& line, char c = DEFAULT_LINE_SEP) -> bool
     {
-        requireOpened();
+        Base::requireOpened();
         return doReadLine(line, c);
     }
 
     auto readLine(char c = DEFAULT_LINE_SEP) -> boost::optional<std::string>
     {
-        requireOpened();
+        Base::requireOpened();
         auto line = std::string{};
         if (!doReadLine(line, c))
             return {};
@@ -67,32 +68,36 @@ public:
 
     auto lines(char c = DEFAULT_LINE_SEP) -> Lines
     {
-        requireOpened();
+        Base::requireOpened();
         return Lines{ *this, c };
     }
 
 private:
+    using Base = InputFile<BasicTextInputFile<StreamT>, StreamT, std::ios_base::in>;
+
     friend class Lines;
-    friend class InputFile<TextInputFile, std::ios_base::in>;
+    friend Base;
 
     auto doReadLine(std::string& line, char c = DEFAULT_LINE_SEP) -> bool
     {
-        auto pos = m_stream.tellg();
+        auto pos = Base::stream().tellg();
 
-        std::getline(m_stream, line, c);
+        std::getline(Base::stream(), line, c);
 
-        if (!m_stream.eof() && !m_stream)
-            throw ReadError{ m_path, pos, "readline" };
+        if (!Base::stream().eof() && !Base::stream())
+            throw ReadError{ Base::path(), pos, "readline" };
 
-        return !m_stream.eof();
+        return !Base::stream().eof();
     }
 
     template<typename Arg>
     auto readImpl(Arg& arg) -> void
     {
-        m_stream >> arg;
+        Base::stream() >> arg;
     }
 };
+
+using TextInputFile = BasicTextInputFile<std::fstream>;
 
 } // namespace io
 } // namespace rafalw

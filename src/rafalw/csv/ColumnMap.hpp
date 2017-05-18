@@ -1,5 +1,5 @@
-#ifndef RAFALW_CSV_COLUMNS_HPP_
-#define RAFALW_CSV_COLUMNS_HPP_
+#ifndef RAFALW_CSV_COLUMNMAP_HPP_
+#define RAFALW_CSV_COLUMNMAP_HPP_
 
 #include <rafalw/csv/Reader.hpp>
 #include <rafalw/csv/ColumnSimple.hpp>
@@ -11,7 +11,7 @@
 inline namespace rafalw {
 namespace csv {
 
-class Columns
+class ColumnMap
 {
 public:
     using Data = boost::container::small_vector<Column, 32>;
@@ -24,7 +24,7 @@ public:
         {}
     };
 
-    Columns(Reader& reader) :
+    ColumnMap(Reader& reader) :
         m_path{ reader.path() }
     {
         auto& line = peek(reader);
@@ -38,15 +38,13 @@ public:
         update(reader);
     }
 
-    auto get(const boost::string_view& name) const -> ColumnSimple
+    auto get(const boost::string_view& name) const -> const Column&
     {
-        return ColumnSimple{ find(name) };
-    }
-
-    template<typename T>
-    auto get(const boost::string_view& name) const -> ColumnTyped<T>
-    {
-        return ColumnTyped<T>{ find(name) };
+        try {
+            return *m_map.at(name);
+        } catch (const std::out_of_range&) {
+            throw ColumnNotFoundError{ m_path, name };
+        }
     }
 
     auto data() const -> const Data&
@@ -58,23 +56,14 @@ private:
     boost::string_view m_path;
     boost::container::small_vector<Column, 32> m_data;
     std::map<boost::string_view, Column*> m_map;
-
-    auto find(const boost::string_view& name) const -> const Column&
-    {
-        try {
-            return *m_map.at(name);
-        } catch (const std::out_of_range&) {
-            throw ColumnNotFoundError{ m_path, name };
-        }
-    }
 };
 
-inline auto begin(const Columns& cs) -> Columns::Data::const_iterator
+inline auto begin(const ColumnMap& cs) -> ColumnMap::Data::const_iterator
 {
     return cs.data().begin();
 }
 
-inline auto end(const Columns& cs) -> Columns::Data::const_iterator
+inline auto end(const ColumnMap& cs) -> ColumnMap::Data::const_iterator
 {
     return cs.data().end();
 }
@@ -82,4 +71,4 @@ inline auto end(const Columns& cs) -> Columns::Data::const_iterator
 } // namespace csv
 } // namespace rafalw
 
-#endif // RAFALW_CSV_COLUMNS_HPP_
+#endif // RAFALW_CSV_COLUMNMAP_HPP_

@@ -9,49 +9,37 @@
 inline namespace rafalw {
 namespace io {
 
-template<typename Impl, std::ios_base::openmode M>
-class InputFile : public File
+template<typename DerivedT, typename StreamT, std::ios_base::openmode OpenModeV>
+class InputFile : public File<StreamT>
 {
 public:
-    class ReadError : public Error
-    {
-    public:
-        ReadError(const std::string& path, std::istream::pos_type pos, const std::string& type) :
-            Error{ "read failed for \"", path, "\" at offset ", pos, " [", type, "]" }
-        {}
-    };
-
-    InputFile() :
-        File{ M | std::ios_base::in }
-    {}
-
     InputFile(const std::string& path) :
-        File{ M | std::ios_base::in, path }
+        Base{ path, OpenModeV | std::ios_base::in }
     {}
 
     auto position() -> std::istream::pos_type
     {
-        return m_stream.tellg();
+        return Base::stream().tellg();
     }
 
     template<typename... Args>
     auto read(Args&... args) -> bool
     {
-        requireOpened();
+        Base::requireOpened();
         return doRead(args...);
     }
 
     template<typename T>
     auto read() -> boost::optional<T>
     {
-        requireOpened();
+        Base::requireOpened();
         return doRead<T>();
     }
 
     template<typename... Args>
     auto readAt(std::fstream::pos_type pos, Args&... args) -> bool
     {
-        requireOpened();
+        Base::requireOpened();
         doSeek(pos);
         return doRead(args...);
     }
@@ -59,22 +47,25 @@ public:
     template<typename T>
     auto readAt(std::fstream::pos_type pos) -> boost::optional<T>
     {
-        requireOpened();
+        Base::requireOpened();
         doSeek(pos);
         return doRead<T>();
     }
 
     auto seek(std::istream::pos_type pos) -> void
     {
-        requireOpened();
+        Base::requireOpened();
         doSeek(pos);
     }
 
 private:
+    using Base = File<StreamT>;
+    using Derived = DerivedT;
+
     auto doSeek(std::istream::pos_type pos) -> void
     {
-        m_stream.seekg(pos);
-        m_stream.clear();
+        Base::stream().seekg(pos);
+        Base::stream().clear();
     }
 
     template<typename... Args>
@@ -82,15 +73,15 @@ private:
     {
         utils::static_foreach(std::tuple<Args&...>(args...), [this](auto& arg) {
 
-            auto pos = m_stream.tellg();
+            auto pos = Base::stream().tellg();
 
-            static_cast<Impl*>(this)->readImpl(arg);
+            static_cast<Derived*>(this)->readImpl(arg);
 
-            if (!m_stream.eof() && !m_stream)
-                throw ReadError{ m_path, pos, utils::demangle<decltype(arg)>() };
+            if (!Base::stream().eof() && !Base::stream())
+                throw ReadError{ Base::path(), pos, utils::demangle<decltype(arg)>() };
         });
 
-        return !m_stream.eof();
+        return !Base::stream().eof();
     }
 
     template<typename T>

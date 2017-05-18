@@ -1,7 +1,6 @@
 #ifndef RAFALW_CSV_LINE_HPP_
 #define RAFALW_CSV_LINE_HPP_
 
-#include <rafalw/csv/common.hpp>
 #include <rafalw/csv/Error.hpp>
 #include <rafalw/generator/string/Tokens.hpp>
 #include <rafalw/strings/parse.hpp>
@@ -20,6 +19,12 @@ public:
     using String = std::basic_string<Char>;
     using StringView = boost::basic_string_view<Char>;
 
+    enum class EmptyPolicy
+    {
+        KEEP,
+        IGNORE
+    };
+
     class Error : public utils::Error
     {
     public:
@@ -37,14 +42,14 @@ public:
         {}
     };
 
-    Line(const String& line, const StringView& delimiters, Empty ep, const std::string& filename, int lineno) :
+    Line(const String& line, const StringView& delimiters, EmptyPolicy ep, const std::string& filename, int lineno) :
         m_line{ line },
         m_filename{ filename },
         m_number{ lineno }
     {
         for (auto&& token: generator::string::tokens(m_line, delimiters))
         {
-            if (ep == Empty::IGNORE && token.empty())
+            if (ep == EmptyPolicy::IGNORE && token.empty())
                 continue;
 
             m_items.push_back(token);

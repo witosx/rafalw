@@ -13,14 +13,16 @@
 inline namespace rafalw {
 namespace csv {
 
-template<typename CharT>
+template<typename StreamT>
 class ReaderBasic : private generator::Base
 {
 public:
-    using Char = CharT;
+    using Stream = StreamT;
+    using Char = typename Stream::char_type;
     using String = std::basic_string<Char>;
 
-    ReaderBasic(const std::string& path, String delimiters, Empty ep = Empty::KEEP) :
+    template<typename... ParamsT>
+    ReaderBasic(const std::string& path, String delimiters, Line::EmptyPolicy ep = Line::EmptyPolicy::KEEP ) :
         m_file{ path },
         m_delimiters{ delimiters },
         m_emptyPolicy{ ep }
@@ -37,11 +39,12 @@ private:
     friend class generator::BaseAccess;
 
     int m_lineno = 1;
-    io::TextInputFile m_file;
-    io::TextInputFile::Lines m_lines{ m_file.lines() };
+
+    io::BasicTextInputFile<Stream> m_file;
+    typename io::BasicTextInputFile<Stream>::Lines m_lines{ m_file.lines() };
 
     String m_delimiters;
-    Empty m_emptyPolicy;
+    Line::EmptyPolicy m_emptyPolicy;
     boost::optional<Line> m_line;
 
     auto generatorDone() const -> bool
@@ -71,7 +74,7 @@ private:
     }
 };
 
-using Reader = ReaderBasic<char>;
+using Reader = ReaderBasic<std::ifstream>;
 
 } // namespace csv
 } // namespace rafalw

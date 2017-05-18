@@ -8,18 +8,10 @@
 inline namespace rafalw {
 namespace io {
 
-template<typename Impl, std::ios_base::openmode M>
-class OutputFile : public File
+template<typename DerivedT, typename StreamT, std::ios_base::openmode M>
+class OutputFile : public File<StreamT>
 {
 public:
-    class WriteError : public Error
-    {
-    public:
-        WriteError(const std::string& path) :
-            Error{ "write failed for \"", path, "\"" }
-        {}
-    };
-
     enum Mode
     {
         TRUNCATE,
@@ -27,37 +19,36 @@ public:
     };
 
 private:
+    using Base = File<StreamT>;
+    using Derived = DerivedT;
+
     static auto mode(Mode m) -> std::ios_base::openmode
     {
         return M | std::ios_base::out | (m == Mode::TRUNCATE ? std::ios_base::trunc : std::ios_base::app);
     }
 
 public:
-    OutputFile(Mode m = Mode::TRUNCATE) :
-        File{ mode(m) }
-    {}
-
     OutputFile(const std::string& path, Mode m = Mode::TRUNCATE) :
-        File{ mode(m), path }
+        Base{ path, mode(m) }
     {}
 
     template<typename... Args>
     auto write(const Args&... args) -> void
     {
-        requireOpened();
+        Base::requireOpened();
 
         utils::static_foreach(std::forward_as_tuple(args...), [this](auto& arg){
-            static_cast<Impl*>(this)->writeImpl(arg);
+            static_cast<Derived*>(this)->writeImpl(arg);
         });
 
-        if (!m_stream)
-            throw WriteError{ m_path };
+        if (!Base::stream())
+            throw WriteError{ Base::path() };
     }
 
     auto flush() -> void
     {
-        if (m_stream.is_open())
-            m_stream.flush();
+        if (Base::stream())
+            Base::stream().flush();
     }
 };
 

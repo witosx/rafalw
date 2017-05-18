@@ -6,21 +6,25 @@
 inline namespace rafalw {
 namespace io {
 
-class BinaryInputFile : public InputFile<BinaryInputFile, std::ios_base::binary>
+template<typename StreamT>
+class BasicBinaryInputFile : public InputFile<BasicBinaryInputFile<StreamT>, StreamT, std::ios_base::binary>
 {
 private:
-    using InputFile<BinaryInputFile, std::ios_base::binary>::InputFile;
+    using Base = InputFile<BasicBinaryInputFile<StreamT>, StreamT, std::ios_base::binary>;
+    using Base::Base;
 
-    friend class InputFile<BinaryInputFile, std::ios_base::binary>;
+    friend Base;
 
     template<typename Arg>
     auto readImpl(Arg& arg) -> void
     {
-        m_stream.read(reinterpret_cast<char*>(&arg), sizeof(arg));
+        Base::stream().read(reinterpret_cast<char*>(&arg), sizeof(arg));
     }
 };
 
+using BinaryInputFile = BasicBinaryInputFile<std::fstream>;
+
 } // namespace io
-} // inline namespace rafalw
+} // namespace rafalw
 
 #endif // RAFALW_IO_BINARYINPUTFILE_HPP_

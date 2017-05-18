@@ -6,19 +6,23 @@
 inline namespace rafalw {
 namespace io {
 
-class BinaryOutputFile : public OutputFile<BinaryOutputFile, std::ios_base::binary>
+template<typename StreamT>
+class BasicBinaryOutputFile : public OutputFile<BasicBinaryOutputFile<StreamT>, StreamT, std::ios_base::binary>
 {
 private:
-    using OutputFile<BinaryOutputFile, std::ios_base::binary>::OutputFile;
+    using Base = OutputFile<BasicBinaryOutputFile<StreamT>, StreamT, std::ios_base::binary>;
+    using Base::Base;
 
-    friend class OutputFile<BinaryOutputFile, std::ios_base::binary>;
+    friend Base;
 
     template<typename Arg>
     auto writeImpl(const Arg& arg) -> void
     {
-        m_stream.write(reinterpret_cast<const char*>(&arg), sizeof(arg));
+        Base::stream().write(reinterpret_cast<const char*>(&arg), sizeof(arg));
     }
 };
+
+using BinaryOutputFile = BasicBinaryOutputFile<std::fstream>;
 
 } // namespace io
 } // namespace rafalw

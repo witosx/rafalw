@@ -7,76 +7,71 @@
 inline namespace rafalw {
 namespace io {
 
+class Error : public utils::Error
+{
+public:
+    template<typename... Args>
+    Error(const Args&... args) :
+        utils::Error{ "File error: ", args... }
+    {}
+};
+
+class OpenError : public Error
+{
+public:
+    OpenError(const std::string& path) :
+        Error{ "open failed for \"", path, "\"" }
+    {}
+};
+
+class ClosedError : public Error
+{
+public:
+    ClosedError() :
+        Error{ "closed" }
+    {}
+};
+
+class ReadError : public Error
+{
+public:
+    ReadError(const std::string& path, std::istream::pos_type pos, const std::string& type) :
+        Error{ "read failed for \"", path, "\" at offset ", pos, " [", type, "]" }
+    {}
+};
+
+class WriteError : public Error
+{
+public:
+    WriteError(const std::string& path) :
+        Error{ "write failed for \"", path, "\"" }
+    {}
+};
+
+template<typename StreamT = std::fstream>
 class File
 {
 public:
-    class Error : public utils::Error
-    {
-    public:
-        template<typename... Args>
-        Error(const Args&... args) :
-            utils::Error{ "File error: ", args... }
-        {}
-    };
+    using Stream = StreamT;
+    using Char = typename Stream::char_type;
 
-    class ClosedError : public Error
-    {
-    public:
-        ClosedError() :
-            Error{ "closed" }
-        {}
-    };
-
-    class OpenError : public Error
-    {
-    public:
-        OpenError(const std::string& path) :
-            Error{ "open failed for \"", path, "\"" }
-        {}
-    };
-
-protected:
-    std::fstream m_stream;
-    std::string m_path;
-    std::ios_base::openmode m_mode;
-
-    File(std::ios_base::openmode mode) :
+    File(const std::string& path, std::ios_base::openmode mode) :
+        m_path{ path },
         m_mode{ mode }
-    {}
-
-    File(std::ios_base::openmode mode, const std::string& path) :
-        File{ mode }
     {
-        open(path);
+        open();
     }
 
-    auto requireOpened() const -> void
+    auto reopen() -> void
     {
-        if (!opened())
-            throw ClosedError{};
-    }
-
-public:
-    auto open(const std::string& path) -> void
-    {
-        if (m_stream.is_open())
-        {
-            m_stream.close();
-            m_stream.clear();
-        }
-
-        m_stream.open(path, m_mode);
-
-        if (!opened())
-            throw OpenError{ path };
-
-        m_path = path;
+        close();
+        open();
     }
 
     auto close() -> void
     {
         m_stream.close();
-        m_path.clear();
+        m_stream.clear();
     }
 
     auto opened() const -> bool
@@ -86,8 +81,37 @@ public:
 
     auto path() const -> const std::string&
     {
-        requireOpened();
         return m_path;
+    }
+
+protected:
+    auto requireOpened() const -> void
+    {
+        if (!opened())
+            throw ClosedError{};
+    }
+
+    auto stream() -> Stream&
+    {
+        return m_stream;
+    }
+
+    auto stream() const -> const Stream&
+    {
+        return m_stream;
+    }
+
+private:
+    Stream m_stream;
+    std::string m_path;
+    std::ios_base::openmode m_mode;
+
+    auto open() -> void
+    {
+        m_stream.open(m_path, m_mode);
+
+        if (!opened())
+            throw OpenError{ m_path };
     }
 };
 
