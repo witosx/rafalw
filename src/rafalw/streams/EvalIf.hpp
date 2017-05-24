@@ -2,7 +2,7 @@
 #define RAFALW_STREAMS_EVALIF_HPP_
 
 #include <rafalw/streams/Eval.hpp>
-#include <boost/optional.hpp>
+#include <experimental/optional>
 
 inline namespace rafalw {
 namespace streams {
@@ -30,7 +30,7 @@ public:
     }
 
 private:
-    boost::optional<Base> m_base;
+    std::experimental::optional<Base> m_base;
 };
 
 template<typename CondT, typename WriteFuncT>

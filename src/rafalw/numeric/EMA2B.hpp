@@ -76,7 +76,7 @@ public:
 private:
     Duration m_tau;
     TrendEMA m_trend;
-    boost::optional<Value> m_value;
+    std::experimental::optional<Value> m_value;
 
     template<typename... Params>
     EMA2B(const std::tuple<Params...>& params) :

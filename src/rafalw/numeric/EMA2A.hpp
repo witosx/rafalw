@@ -78,7 +78,7 @@ public:
 private:
     EMA1 m_ema1;
     EMA1 m_ema2;
-    boost::optional<Value> m_value;
+    std::experimental::optional<Value> m_value;
 
     template<typename... Params>
     EMA2A(const std::tuple<Params...>& params) :

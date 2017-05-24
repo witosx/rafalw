@@ -2,7 +2,7 @@
 #define RAFALW_NUMERIC_EMA1_HPP_
 
 #include <rafalw/utils/assert.hpp>
-#include <boost/optional.hpp>
+#include <experimental/optional>
 #include <cmath>
 #include <utility>
 #include <tuple>
@@ -61,7 +61,7 @@ public:
 
 private:
     Duration m_tau;
-    boost::optional<Value> m_value;
+    std::experimental::optional<Value> m_value;
 
     template<typename... Params>
     EMA1(const std::tuple<Params...>& params) :

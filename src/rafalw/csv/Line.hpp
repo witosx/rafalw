@@ -17,7 +17,7 @@ class Line
 public:
     using Char = char;
     using String = std::basic_string<Char>;
-    using StringView = boost::basic_string_view<Char>;
+    using StringView = std::experimental::basic_string_view<Char>;
 
     enum class EmptyPolicy
     {

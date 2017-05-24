@@ -1,7 +1,7 @@
 #ifndef RAFALW_GENERATOR_DETAIL_HPP_
 #define RAFALW_GENERATOR_DETAIL_HPP_
 
-#include <boost/optional.hpp>
+#include <experimental/optional>
 
 inline namespace rafalw {
 namespace generator {
@@ -32,7 +32,7 @@ public:
     }
 
 private:
-    boost::optional<T> m_data;
+    std::experimental::optional<T> m_data;
 };
 
 template<typename T>

@@ -3,7 +3,7 @@
 
 #include <rafalw/io/InputFile.hpp>
 #include <rafalw/generator/Base.hpp>
-#include <boost/optional.hpp>
+#include <experimental/optional>
 
 inline namespace rafalw {
 namespace io {
@@ -57,7 +57,7 @@ public:
         return doReadLine(line, c);
     }
 
-    auto readLine(char c = DEFAULT_LINE_SEP) -> boost::optional<std::string>
+    auto readLine(char c = DEFAULT_LINE_SEP) -> std::experimental::optional<std::string>
     {
         Base::requireOpened();
         auto line = std::string{};

@@ -4,7 +4,7 @@
 #include <rafalw/utils/static.hpp>
 #include <rafalw/streams/misc.hpp>
 #include <boost/tokenizer.hpp>
-#include <boost/utility/string_view.hpp>
+#include <experimental/string_view>
 #include <algorithm>
 #include <vector>
 #include <string>

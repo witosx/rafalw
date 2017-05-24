@@ -7,7 +7,7 @@
 #include <rafalw/utils/Error.hpp>
 #include <rafalw/utils/assert.hpp>
 #include <rafalw/utils/ScopeGuard.hpp>
-#include <boost/optional.hpp>
+#include <experimental/optional>
 #include <string>
 
 inline namespace rafalw {
@@ -45,7 +45,7 @@ private:
 
     String m_delimiters;
     Line::EmptyPolicy m_emptyPolicy;
-    boost::optional<Line> m_line;
+    std::experimental::optional<Line> m_line;
 
     auto generatorDone() const -> bool
     {
@@ -61,7 +61,7 @@ private:
     {
         if (done(m_lines))
         {
-            m_line.reset();
+            m_line = std::experimental::nullopt;
             return;
         }
 
