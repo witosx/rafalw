@@ -6,6 +6,7 @@
 #include <type_traits>
 #include <typeindex>
 #include <typeinfo>
+#include <utility>
 
 inline namespace rafalw {
 namespace typelist {
