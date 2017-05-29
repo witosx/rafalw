@@ -4,7 +4,7 @@
 #include <rafalw/io/File.hpp>
 #include <rafalw/utils/static.hpp>
 #include <rafalw/utils/demangle.hpp>
-#include <experimental/optional>
+#include <optional>
 
 inline namespace rafalw {
 namespace io {
@@ -30,7 +30,7 @@ public:
     }
 
     template<typename T>
-    auto read() -> std::experimental::optional<T>
+    auto read() -> std::optional<T>
     {
         Base::requireOpened();
         return doRead<T>();
@@ -45,7 +45,7 @@ public:
     }
 
     template<typename T>
-    auto readAt(std::fstream::pos_type pos) -> std::experimental::optional<T>
+    auto readAt(std::fstream::pos_type pos) -> std::optional<T>
     {
         Base::requireOpened();
         doSeek(pos);
@@ -85,7 +85,7 @@ private:
     }
 
     template<typename T>
-    auto doRead() -> std::experimental::optional<T>
+    auto doRead() -> std::optional<T>
     {
         auto v = T{};
         if (!doRead(v))

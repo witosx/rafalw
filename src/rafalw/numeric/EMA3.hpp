@@ -97,7 +97,7 @@ private:
     EMA1 m_sema3;
     EMA2 m_dema;
 
-    std::experimental::optional<Value> m_value;
+    std::optional<Value> m_value;
 };
 
 } // namespace numeric

@@ -1,7 +1,7 @@
 #ifndef RAFALW_CSV_COLUMN_HPP_
 #define RAFALW_CSV_COLUMN_HPP_
 
-#include <experimental/string_view>
+#include <string_view>
 #include <string>
 
 inline namespace rafalw {
@@ -10,7 +10,7 @@ namespace csv {
 class Column
 {
 public:
-    Column(const std::experimental::string_view& name, int index) :
+    Column(const std::string_view& name, int index) :
         m_name{ name },
         m_index{ index }
     {}

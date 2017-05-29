@@ -2,7 +2,7 @@
 #define RAFALW_GENERATOR_COMPOSITE_OPTIONAL_HPP_
 
 #include <rafalw/generator/Base.hpp>
-#include <experimental/optional>
+#include <optional>
 #include <type_traits>
 
 inline namespace rafalw {
@@ -24,7 +24,7 @@ public:
 private:
     friend class BaseAccess;
 
-    std::experimental::optional<Generator> m_generator;
+    std::optional<Generator> m_generator;
 
     auto generatorDone() const -> bool
     {

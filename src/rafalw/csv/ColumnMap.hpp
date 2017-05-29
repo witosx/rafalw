@@ -19,7 +19,7 @@ public:
     class ColumnNotFoundError : public Error
     {
     public:
-        ColumnNotFoundError(const std::experimental::string_view& file, const std::experimental::string_view& name) :
+        ColumnNotFoundError(const std::string_view& file, const std::string_view& name) :
             Error{ "column '", name, "' not found in file ", file }
         {}
     };
@@ -38,7 +38,7 @@ public:
         update(reader);
     }
 
-    auto get(const std::experimental::string_view& name) const -> const Column&
+    auto get(const std::string_view& name) const -> const Column&
     {
         try {
             return *m_map.at(name);
@@ -53,9 +53,9 @@ public:
     }
 
 private:
-    std::experimental::string_view m_path;
+    std::string_view m_path;
     boost::container::small_vector<Column, 32> m_data;
-    std::map<std::experimental::string_view, Column*> m_map;
+    std::map<std::string_view, Column*> m_map;
 };
 
 inline auto begin(const ColumnMap& cs) -> ColumnMap::Data::const_iterator

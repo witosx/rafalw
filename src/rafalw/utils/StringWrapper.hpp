@@ -1,7 +1,7 @@
 #ifndef RAFALW_UTILS_STRINGWRAPPER_HPP_
 #define RAFALW_UTILS_STRINGWRAPPER_HPP_
 
-#include <experimental/string_view>
+#include <string_view>
 #include <ostream>
 
 inline namespace rafalw {
@@ -15,7 +15,7 @@ public:
     using String = StringT;
     using Char = typename String::value_type;
 
-    explicit StringWrapper(const std::experimental::basic_string_view<Char>& str) :
+    explicit StringWrapper(const std::basic_string_view<Char>& str) :
         m_string{ str.data(), str.length() }
     {}
 

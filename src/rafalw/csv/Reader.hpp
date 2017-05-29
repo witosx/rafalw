@@ -7,8 +7,9 @@
 #include <rafalw/utils/Error.hpp>
 #include <rafalw/utils/assert.hpp>
 #include <rafalw/utils/ScopeGuard.hpp>
-#include <experimental/optional>
+#include <optional>
 #include <string>
+#include <string_view>
 
 inline namespace rafalw {
 namespace csv {
@@ -22,8 +23,8 @@ public:
     using String = std::basic_string<Char>;
 
     template<typename... ParamsT>
-    ReaderBasic(const std::string& path, String delimiters, Line::EmptyPolicy ep = Line::EmptyPolicy::KEEP ) :
-        m_file{ path },
+    ReaderBasic(std::string_view path, String delimiters, Line::EmptyPolicy ep = Line::EmptyPolicy::KEEP ) :
+        m_file{ std::string{ path } },
         m_delimiters{ delimiters },
         m_emptyPolicy{ ep }
     {
@@ -45,7 +46,7 @@ private:
 
     String m_delimiters;
     Line::EmptyPolicy m_emptyPolicy;
-    std::experimental::optional<Line> m_line;
+    std::optional<Line> m_line;
 
     auto generatorDone() const -> bool
     {
@@ -61,7 +62,7 @@ private:
     {
         if (done(m_lines))
         {
-            m_line = std::experimental::nullopt;
+            m_line = std::nullopt;
             return;
         }
 

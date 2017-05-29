@@ -3,7 +3,7 @@
 
 #include <rafalw/io/InputFile.hpp>
 #include <rafalw/generator/Base.hpp>
-#include <experimental/optional>
+#include <optional>
 
 inline namespace rafalw {
 namespace io {
@@ -57,7 +57,7 @@ public:
         return doReadLine(line, c);
     }
 
-    auto readLine(char c = DEFAULT_LINE_SEP) -> std::experimental::optional<std::string>
+    auto readLine(char c = DEFAULT_LINE_SEP) -> std::optional<std::string>
     {
         Base::requireOpened();
         auto line = std::string{};

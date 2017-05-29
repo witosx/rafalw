@@ -2,7 +2,7 @@
 #define RAFALW_GENERATOR_STRING_TOKENS_HPP_
 
 #include <rafalw/generator/Base.hpp>
-#include <experimental/string_view>
+#include <string_view>
 
 inline namespace rafalw {
 namespace generator {
@@ -13,7 +13,7 @@ class Tokens : private generator::Base
 {
 public:
     using Char = CharT;
-    using StringView = std::experimental::basic_string_view<Char>;
+    using StringView = std::basic_string_view<Char>;
 
     Tokens(const StringView& string, const StringView& separators) :
         m_stringFull{ string },
@@ -81,7 +81,7 @@ auto tokens(const std::basic_string<Char>& str, Sep&& sep) -> Tokens<Char>
 }
 
 template<typename Char, typename Sep>
-auto tokens(const std::experimental::basic_string_view<Char>& str, Sep&& sep) -> Tokens<Char>
+auto tokens(const std::basic_string_view<Char>& str, Sep&& sep) -> Tokens<Char>
 {
     return Tokens<Char>{ str, std::forward<Sep>(sep) };
 }
