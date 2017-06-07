@@ -12,6 +12,9 @@ using size = std::integral_constant<decltype(sizeof(T)), sizeof(T)>;
 template<typename T>
 using type_member = typename T::type;
 
+template<typename T>
+using identity = T;
+
 } // namespace traits
 } // namespace rafalw
 
