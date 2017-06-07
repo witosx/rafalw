@@ -1,6 +1,7 @@
 #ifndef RAFALW_GENERATOR_STREAM_ITEMS_HPP_
 #define RAFALW_GENERATOR_STREAM_ITEMS_HPP_
 
+#include <rafalw/generator/stream/Error.hpp>
 #include <rafalw/generator/Base.hpp>
 #include <istream>
 #include <string>
@@ -17,8 +18,10 @@ public:
     using Char = CharT;
     using Stream = std::basic_istream<Char>;
 
-    explicit Items(Stream& stream) :
-        m_stream{ stream }
+    template<typename... ItemArgsT>
+    explicit Items(Stream& stream, ItemArgsT&&... item_args) :
+        m_stream{ stream },
+        m_item{ std::forward<ItemArgsT>(item_args)... }
     {
         generatorUpdate();
     }
@@ -31,6 +34,7 @@ private:
 
     auto generatorPeek() const -> const Item&
     {
+        streamCheckErrors();
         return m_item;
     }
 
@@ -41,14 +45,20 @@ private:
 
     auto generatorDone() const -> bool
     {
-        return m_stream.fail() || m_stream.bad();
+        return !m_stream && m_stream.eof();
+    }
+
+    auto streamCheckErrors() const -> void
+    {
+        if (!m_stream && !m_stream.eof())
+            throw Error{ "read failed" };
     }
 };
 
-template<typename Item = std::string, typename Char = char>
-auto items(std::basic_istream<Char>& stream) -> Items<Item, Char>
+template<typename Item = std::string, typename Char, typename... ItemArgsT>
+auto items(std::basic_istream<Char>& stream, ItemArgsT&&... item_args) -> Items<Item, Char>
 {
-    return Items<Item, Char>{ stream };
+    return Items<Item, Char>{ stream, std::forward<ItemArgsT>(item_args)... };
 }
 
 } // namespace stream

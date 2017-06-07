@@ -28,26 +28,26 @@ protected:
 class BaseAccess
 {
 public:
-    template<typename T>
-    static auto done(const T& g) -> decltype(g.generatorDone())
+    template<typename GeneratorT>
+    static auto done(const GeneratorT& g) -> bool
     {
         return g.generatorDone();
     }
 
-    template<typename T>
-    static auto peek(const T& g) -> decltype(g.generatorPeek())
+    template<typename GeneratorT>
+    static auto peek(const GeneratorT& g) -> decltype(g.generatorPeek())
     {
         return g.generatorPeek();
     }
 
-    template<typename T>
-    static auto update(T& g) -> decltype(g.generatorUpdate())
+    template<typename GeneratorT>
+    static auto update(GeneratorT& g) -> void
     {
-        return g.generatorUpdate();
+        g.generatorUpdate();
     }
 
-    template<typename T>
-    static auto reset(T& g) -> decltype(g.generatorReset())
+    template<typename GeneratorT>
+    static auto reset(GeneratorT& g) -> decltype(g.generatorReset())
     {
         return g.generatorReset();
     }
@@ -76,10 +76,11 @@ auto peek(const G& g) -> decltype(BaseAccess::peek(g))
 }
 
 template<typename G, require_instance<G> = nullptr>
-auto update(G& g) -> void
+auto update(G& g) -> G&
 {
     rafalw_utils_assert(!done(g));
-	return BaseAccess::update(g);
+	BaseAccess::update(g);
+	return g;
 }
 
 template<typename G, require_instance<G> = nullptr>
