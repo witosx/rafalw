@@ -46,6 +46,21 @@ constexpr auto int_pow2(int power) -> T
     return T{ 1 } << power;
 }
 
+template<typename Int = int, typename Float>
+inline auto int_from_float(const Float input) -> Int
+{
+    auto intpart = Float{};
+
+    if (std::modf(input, &intpart) != 0.0 ||
+        intpart > std::numeric_limits<Int>::max() ||
+        intpart < std::numeric_limits<Int>::min())
+    {
+        throw utils::Error{ "floating point number ", input, " can't be treated as integral" };
+    }
+
+    return static_cast<Int>(intpart);
+}
+
 template<typename T1, typename T2>
 constexpr auto round_dn(T1 v, T2 r) -> T1
 {
