@@ -48,9 +48,9 @@ private:
     }
 };
 
-using FileReader = BasicFileReader<char>;
+using FileReader = BasicFileReader<std::basic_ifstream<char>>;
 
-template<typename StreamT = std::ifstream>
+template<typename StreamT = std::basic_ifstream<char>>
 inline auto reader(std::string_view path, typename BasicFileReader<StreamT>::StringView row_delimiters, BaseRow::EmptyPolicy row_policy = BaseRow::EmptyPolicy::KEEP) -> BasicFileReader<StreamT>
 {
     return BasicFileReader<StreamT>{ path, row_delimiters, row_policy };

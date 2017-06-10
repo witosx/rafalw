@@ -12,7 +12,7 @@ class Error : public utils::Error
 public:
     template<typename... Args>
     Error(const Context& context, const Args&... args) :
-        utils::Error{ "csv ", context.source, " line ", context.line, " ", args..., },
+        utils::Error{ "csv source ", context.source, " row ", context.line, " ", args..., },
         m_context{ context }
     {}
 

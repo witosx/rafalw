@@ -3,7 +3,7 @@
 
 #include <rafalw/csv/StreamReader.hpp>
 #include <rafalw/csv/FileReader.hpp>
-#include <rafalw/csv/Header.hpp>
-#include <rafalw/csv/ParsedColumn.hpp>
+#include <rafalw/csv/ColumnSimple.hpp>
+#include <rafalw/csv/ColumnParsed.hpp>
 
 #endif // RAFALW_CSV_CSV_HPP_

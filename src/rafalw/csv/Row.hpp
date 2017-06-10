@@ -2,12 +2,10 @@
 #define RAFALW_CSV_ROW_HPP_
 
 #include <rafalw/csv/Context.hpp>
-#include <rafalw/csv/Error.hpp>
+#include <rafalw/csv/ColumnError.hpp>
 #include <rafalw/generator/string/Tokens.hpp>
-#include <rafalw/strings/parse.hpp>
-#include <rafalw/utils/demangle.hpp>
 #include <string>
-#include <sstream>
+#include <string_view>
 #include <vector>
 
 inline namespace rafalw {
@@ -22,24 +20,27 @@ public:
         IGNORE
     };
 
-    class ColumnIndexOutOfRangeError : public Error
+    BaseRow(const Context& context, EmptyPolicy policy) :
+        m_context{ context },
+        m_keepEmptyTokens{ policy == EmptyPolicy::KEEP }
+    {}
+
+    BaseRow(const BaseRow&) = delete;
+
+    auto context() const -> const Context&
     {
-    public:
-        ColumnIndexOutOfRangeError(const Context& context, int column_index) :
-            Error{ context, "column index (", column_index, ") out of range" },
-            m_columnIndex{ column_index }
-        {}
+        return m_context;
+    }
 
-        auto columnIndex() const -> int
-        {
-            return m_columnIndex;
-        }
+protected:
+    auto keepEmptyTokens() const -> bool
+    {
+        return m_keepEmptyTokens;
+    }
 
-    private:
-        int m_columnIndex;
-    };
-
-    using ColumnIndex = int;
+private:
+    const Context& m_context;
+    bool m_keepEmptyTokens;
 };
 
 template<typename CharT>
@@ -50,56 +51,53 @@ public:
     using String = std::basic_string<Char>;
     using StringView = std::basic_string_view<Char>;
 
-    BasicRow(const Context& context, StringView delimiters, EmptyPolicy policy) :
-        m_context{ context },
-        m_delimiters{ delimiters },
-        m_policy{ policy }
-    {}
+    using Columns = std::vector<StringView>;
 
-    auto context() const -> const Context&
-    {
-        return m_context;
-    }
+    BasicRow(const Context& context, StringView delimiters, EmptyPolicy policy) :
+        BaseRow{ context, policy },
+        m_delimiters{ delimiters }
+    {}
 
     auto parse(StringView line) -> void
     {
         m_columns.clear();
-
         for (auto&& token: generator::string::tokens(line, m_delimiters))
-        {
-            if (token.empty() && m_policy == EmptyPolicy::IGNORE)
-                continue;
-
-            m_columns.push_back(token);
-        }
+            if (!token.empty() || keepEmptyTokens())
+                m_columns.push_back(token);
     }
 
-    auto column(ColumnIndex index) const -> const StringView&
-    {
-        try {
-            return m_columns.at(index);
-        } catch (const std::out_of_range&) {
-            throw ColumnIndexOutOfRangeError{ m_context, index };
-        }
-    }
-
-    auto columns() const -> const std::vector<StringView>&
+    auto columns() const -> const Columns&
     {
         return m_columns;
     }
 
 private:
-    const Context& m_context;
     String m_delimiters;
-    EmptyPolicy m_policy;
-
-    std::vector<StringView> m_columns;
+    Columns m_columns;
 };
 
+using Row = BasicRow<char>;
+
 template<typename CharT>
-auto fetch(const BasicRow<CharT>& row, typename BasicRow<CharT>::ColumnIndex index) -> decltype(row.column(index))
+auto fetch(const BasicRow<CharT>& row, int index) -> decltype(row.columns().at(index))
 {
-    return row.column(index);
+    try {
+        return row.columns().at(index);
+    } catch (const std::out_of_range&) {
+        throw ColumnError{ row.context(), index, "not found" };
+    }
+}
+
+template<typename CharT>
+auto begin(const BasicRow<CharT>& row) -> decltype(row.columns().begin())
+{
+    return row.columns().begin();
+}
+
+template<typename CharT>
+auto end(const BasicRow<CharT>& row) -> decltype(row.columns().end())
+{
+    return row.columns().end();
 }
 
 } // namespace csv
