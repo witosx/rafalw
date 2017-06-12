@@ -2,7 +2,7 @@
 #define RAFALW_GENERATOR_STREAM_LINES_HPP_
 
 #include <rafalw/generator/stream/Items.hpp>
-#include <rafalw/streams/Line.hpp>
+#include <rafalw/stream/Line.hpp>
 
 inline namespace rafalw {
 namespace generator {
@@ -26,7 +26,7 @@ public:
 private:
     friend class generator::BaseAccess;
 
-    Items<streams::BasicLine<Char>> m_items;
+    Items<rafalw::stream::BasicLine<Char>> m_items;
 
     auto generatorPeek() const -> decltype(peek(m_items).string())
     {

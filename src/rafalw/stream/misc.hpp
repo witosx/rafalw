@@ -1,5 +1,5 @@
-#ifndef RAFALW_STREAMS_MISC_HPP_
-#define RAFALW_STREAMS_MISC_HPP_
+#ifndef RAFALW_STREAM_MISC_HPP_
+#define RAFALW_STREAM_MISC_HPP_
 
 #include <rafalw/utils/static.hpp>
 #include <rafalw/utils/assert.hpp>
@@ -8,7 +8,7 @@
 #include <sstream>
 
 inline namespace rafalw {
-namespace streams {
+namespace stream {
 
 template<typename T>
 auto get(std::istream& is) -> T
@@ -196,7 +196,7 @@ auto stringify(const Args&... args) -> std::basic_string<char>
     return basic_stringify<char>(args...);
 }
 
-} // namespace streams
+} // namespace stream
 } // namespace rafalw
 
-#endif // RAFALW_STREAMS_MISC_HPP_
+#endif // RAFALW_STREAM_MISC_HPP_

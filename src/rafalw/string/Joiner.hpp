@@ -1,10 +1,10 @@
-#ifndef RAFALW_STRINGS_JOINER_HPP_
-#define RAFALW_STRINGS_JOINER_HPP_
+#ifndef RAFALW_STRING_JOINER_HPP_
+#define RAFALW_STRING_JOINER_HPP_
 
 #include <string>
 
 inline namespace rafalw {
-namespace strings {
+namespace string {
 
 template<typename Char>
 class Joiner
@@ -53,7 +53,7 @@ auto join(Strs&&... strs) -> std::string
     return joiner("")(std::move(strs)...);
 }
 
-} // namespace strings
+} // namespace string
 } // namespace rafalw
 
-#endif // RAFALW_STRINGS_JOINER_HPP_
+#endif // RAFALW_STRING_JOINER_HPP_

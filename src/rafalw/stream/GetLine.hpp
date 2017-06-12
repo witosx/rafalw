@@ -1,11 +1,11 @@
-#ifndef RAFALW_STREAMS_GETLINE_HPP_
-#define RAFALW_STREAMS_GETLINE_HPP_
+#ifndef RAFALW_STREAM_GETLINE_HPP_
+#define RAFALW_STREAM_GETLINE_HPP_
 
 #include <rafalw/traits.hpp>
 #include <string>
 
 inline namespace rafalw {
-namespace streams {
+namespace stream {
 
 template<typename CharT>
 class BasicGetLine
@@ -43,7 +43,7 @@ auto getline(std::basic_string<CharT>& string, traits::identity<CharT> separator
 
 using GetLine = BasicGetLine<char>;
 
-} // namespace streams
+} // namespace stream
 } // namespace rafalw
 
-#endif // RAFALW_STREAMS_GETLINE_HPP_
+#endif // RAFALW_STREAM_GETLINE_HPP_

@@ -1,11 +1,11 @@
-#ifndef RAFALW_STREAMS_EVALIF_HPP_
-#define RAFALW_STREAMS_EVALIF_HPP_
+#ifndef RAFALW_STREAM_EVALIF_HPP_
+#define RAFALW_STREAM_EVALIF_HPP_
 
-#include <rafalw/streams/Eval.hpp>
+#include <rafalw/stream/Eval.hpp>
 #include <optional>
 
 inline namespace rafalw {
-namespace streams {
+namespace stream {
 
 template<typename WriteFuncT>
 class EvalIf
@@ -39,7 +39,7 @@ auto eval_if(const CondT& cond, WriteFuncT write) -> EvalIf<WriteFuncT>
     return EvalIf<WriteFuncT>{ static_cast<bool>(cond), std::move(write) };
 }
 
-} // namespace streams
+} // namespace stream
 } // namespace rafalw
 
-#endif // RAFALW_STREAMS_EVALIF_HPP_
+#endif // RAFALW_STREAM_EVALIF_HPP_

@@ -1,5 +1,5 @@
-#ifndef RAFALW_STRINGS_PARSE_HPP_
-#define RAFALW_STRINGS_PARSE_HPP_
+#ifndef RAFALW_STRING_PARSE_HPP_
+#define RAFALW_STRING_PARSE_HPP_
 
 #include <rafalw/utils/Error.hpp>
 #include <rafalw/utils/demangle.hpp>
@@ -8,7 +8,7 @@
 #include <string_view>
 
 inline namespace rafalw {
-namespace strings {
+namespace string {
 
 class ParseError : public utils::Error
 {
@@ -29,7 +29,7 @@ auto parse(const std::string_view& str) -> T
     }
 }
 
-} // namespace strings
+} // namespace string
 } // namespace rafalw
 
-#endif // RAFALW_STRINGS_PARSE_HPP_
+#endif // RAFALW_STRING_PARSE_HPP_

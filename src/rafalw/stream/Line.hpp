@@ -1,10 +1,10 @@
-#ifndef RAFALW_STREAMS_LINE_HPP_
-#define RAFALW_STREAMS_LINE_HPP_
+#ifndef RAFALW_STREAM_LINE_HPP_
+#define RAFALW_STREAM_LINE_HPP_
 
 #include <string>
 
 inline namespace rafalw {
-namespace streams {
+namespace stream {
 
 template<typename CharT>
 class BasicLine
@@ -40,8 +40,8 @@ private:
 
 using Line = BasicLine<char>;
 
-} // namespace streams
+} // namespace stream
 } // namespace rafalw
 
-#endif // RAFALW_STREAMS_LINE_HPP_
+#endif // RAFALW_STREAM_LINE_HPP_
 

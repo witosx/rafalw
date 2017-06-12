@@ -1,10 +1,10 @@
-#ifndef RAFALW_STREAMS_EVAL_HPP_
-#define RAFALW_STREAMS_EVAL_HPP_
+#ifndef RAFALW_STREAM_EVAL_HPP_
+#define RAFALW_STREAM_EVAL_HPP_
 
 #include <iosfwd>
 
 inline namespace rafalw {
-namespace streams {
+namespace stream {
 
 template<typename WriteFuncT>
 class Eval
@@ -33,7 +33,7 @@ auto eval(WriteFuncT write) -> Eval<WriteFuncT>
     return Eval<WriteFuncT>{ std::move(write) };
 }
 
-} // namespace streams
+} // namespace stream
 } // namespace rafalw
 
-#endif // RAFALW_STREAMS_EVAL_HPP_
+#endif // RAFALW_STREAM_EVAL_HPP_

@@ -1,8 +1,8 @@
-#ifndef RAFALW_STRINGS_MISC_HPP_
-#define RAFALW_STRINGS_MISC_HPP_
+#ifndef RAFALW_STRING_MISC_HPP_
+#define RAFALW_STRING_MISC_HPP_
 
 #include <rafalw/utils/static.hpp>
-#include <rafalw/streams/misc.hpp>
+#include <rafalw/stream/misc.hpp>
 #include <boost/tokenizer.hpp>
 #include <string_view>
 #include <algorithm>
@@ -14,7 +14,7 @@
 #include <vector>
 
 inline namespace rafalw {
-namespace strings {
+namespace string {
 
 template<typename T>
 inline auto str(const T& obj)
@@ -83,7 +83,7 @@ template<typename CharT, typename... Args>
 auto basic_stringify(const Args&... args) -> std::basic_string<CharT>
 {
     auto ss = std::basic_ostringstream<CharT>{};
-    ss << streams::stream_args(args...);
+    ss << stream::stream_args(args...);
     return ss.str();
 }
 
@@ -134,7 +134,7 @@ auto tokenize(const std::basic_string<Char>& str, Char separator) -> std::vector
     return std::vector<std::basic_string<Char>>{ boost_tokenizer.begin(), boost_tokenizer.end() };
 }
 
-} // namespace strings
+} // namespace string
 } // namespace rafalw
 
-#endif /* RAFALW_STRINGS_MISC_HPP_ */
+#endif /* RAFALW_STRING_MISC_HPP_ */

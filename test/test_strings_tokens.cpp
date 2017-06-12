@@ -5,7 +5,7 @@ auto test_strings_tokens() -> void
 {
 	{
 		auto str = std::string{ "ala ma kota" };
-		auto tokens = strings::Tokens{ str, " " };
+		auto tokens = string::Tokens{ str, " " };
 
 		std::cout << "- string '" << str << "'\n";
 
@@ -19,7 +19,7 @@ auto test_strings_tokens() -> void
 
 	{
 		auto str = std::string{ "foo,bar,baz," };
-		auto tokens = strings::Tokens{ str, "," };
+		auto tokens = string::Tokens{ str, "," };
 
 		std::cout << "- string '" << str << "'\n";
 
@@ -33,7 +33,7 @@ auto test_strings_tokens() -> void
 
 	{
 		auto str = std::string{ "" };
-		auto tokens = strings::Tokens{ str, " " };
+		auto tokens = string::Tokens{ str, " " };
 
 		std::cout << "- string '" << str << "'\n";
 
@@ -47,7 +47,7 @@ auto test_strings_tokens() -> void
 
 	{
 		auto str = std::string{ "foo   bar baz," };
-		auto tokens = strings::Tokens{ str, " " };
+		auto tokens = string::Tokens{ str, " " };
 
 		std::cout << "- string '" << str << "'\n";
 

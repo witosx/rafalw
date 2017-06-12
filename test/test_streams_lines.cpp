@@ -1,10 +1,10 @@
-#include <rafalw/streams/Lines.hpp>
+#include <rafalw/stream/Lines.hpp>
 #include <rafalw/generator/Transform.hpp>
 #include <rafalw/generator/Filter.hpp>
 #include <rafalw/utils/demangle.hpp>
 #include <sstream>
 
-auto test_streams_lines() -> void
+auto test_stream_lines() -> void
 {
 	{
 		auto ss = std::stringstream{};
@@ -13,7 +13,7 @@ auto test_streams_lines() -> void
 		ss << "\n";
 		ss << "line number 3";
 
-		for (auto&& line: streams::lines(ss))
+		for (auto&& line: stream::lines(ss))
 			std::cout << "line '" << line << "'\n";
 
 		std::cout << "\n";
@@ -26,7 +26,7 @@ auto test_streams_lines() -> void
 		ss << "\n";
 		ss << "line number 3";
 
-		auto g = streams::lines(ss);
+		auto g = stream::lines(ss);
 
 		while (!done(g))
 		{
@@ -43,7 +43,7 @@ auto test_streams_lines() -> void
 		ss << "line number 2\n";
 		ss << "line number 3\n";
 
-		for (auto&& line: streams::lines(ss))
+		for (auto&& line: stream::lines(ss))
 			std::cout << "line '" << line << "'\n";
 
 		std::cout << "\n";
@@ -60,7 +60,7 @@ auto test_streams_lines() -> void
 			return e.length();
 		};
 
-		auto r1 = streams::lines(ss);
+		auto r1 = stream::lines(ss);
 		auto r2 = r1 % f;
 
 		for (auto&& e: r2)
@@ -80,7 +80,7 @@ auto test_streams_lines() -> void
 			return e.length() > 5;
 		};
 
-		for (auto&& e: streams::lines(ss) | f)
+		for (auto&& e: stream::lines(ss) | f)
 			std::cout << e << "\n";
 
 		std::cout << "\n";
