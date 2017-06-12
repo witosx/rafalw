@@ -28,7 +28,7 @@ public:
     template<typename GeneratorT>
     auto wrapperUpdate(GeneratorT& generator) -> void
     {
-        return update(generator);
+        update(generator);
     }
 
     auto wrapperReset()
