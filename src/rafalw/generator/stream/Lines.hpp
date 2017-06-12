@@ -9,7 +9,40 @@ namespace generator {
 namespace stream {
 
 template<typename CharT>
-using BasicLines = Items<streams::BasicLine<CharT>>;
+class BasicLines : private Base
+{
+public:
+    using Char = CharT;
+    using Stream = std::basic_istream<Char>;
+
+    BasicLines(Stream& stream, const Char sep) :
+        m_items{ stream, sep }
+    {}
+
+    explicit BasicLines(Stream& stream) :
+        BasicLines{ stream, stream.widen('\n') }
+    {}
+
+private:
+    friend class generator::BaseAccess;
+
+    Items<streams::BasicLine<Char>> m_items;
+
+    auto generatorPeek() const -> decltype(peek(m_items).string())
+    {
+        return peek(m_items).string();
+    }
+
+    auto generatorUpdate() -> void
+    {
+        update(m_items);
+    }
+
+    auto generatorDone() const -> bool
+    {
+        return done(m_items);
+    }
+};
 
 using Lines = BasicLines<char>;
 
