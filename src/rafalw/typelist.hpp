@@ -2,7 +2,7 @@
 #define RAFALW_TYPELIST_HPP_
 
 #include <rafalw/templates/compose.hpp>
-#include <rafalw/utils/Type.hpp>
+#include <rafalw/utils/helpers.hpp>
 #include <type_traits>
 #include <typeindex>
 #include <typeinfo>
