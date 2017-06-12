@@ -3,7 +3,6 @@
 
 #include <rafalw/generator/Base.hpp>
 #include <rafalw/utils/static.hpp>
-#include <rafalw/tuple.hpp>
 #include <tuple>
 
 inline namespace rafalw {
@@ -25,14 +24,14 @@ private:
 
     auto generatorDone() const -> bool
     {
-        return tuple::apply([](const auto&... gens){
+        return std::apply([](const auto&... gens){
             return (done(gens) || ...);
         }, m_generators);
     }
 
     auto generatorPeek() const
     {
-        return tuple::apply([](const auto&... gens){
+        return std::apply([](const auto&... gens){
             return std::tuple<decltype(peek(gens))...>{ peek(gens)... };
         }, m_generators);
     }
