@@ -1,17 +1,16 @@
-#ifndef RAFALW_GENERATOR_STREAM_ITEMS_HPP_
-#define RAFALW_GENERATOR_STREAM_ITEMS_HPP_
+#ifndef RAFALW_STREAM_ITEMS_HPP_
+#define RAFALW_STREAM_ITEMS_HPP_
 
-#include <rafalw/generator/stream/Error.hpp>
+#include <rafalw/stream/Error.hpp>
 #include <rafalw/generator/Base.hpp>
 #include <istream>
 #include <string>
 
 inline namespace rafalw {
-namespace generator {
 namespace stream {
 
 template<typename ItemT, typename CharT = char>
-class Items : private Base
+class Items : private generator::Base
 {
 public:
     using Item = ItemT;
@@ -62,7 +61,6 @@ auto items(std::basic_istream<Char>& stream, ItemArgsT&&... item_args) -> Items<
 }
 
 } // namespace stream
-} // namespace generator
 } // namespace rafalw
 
-#endif // RAFALW_GENERATOR_STREAM_ITEMS_HPP_
+#endif // RAFALW_STREAM_ITEMS_HPP_

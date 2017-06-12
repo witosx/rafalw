@@ -1,21 +1,20 @@
-#ifndef RAFALW_GENERATOR_STRING_TOKENS_HPP_
-#define RAFALW_GENERATOR_STRING_TOKENS_HPP_
+#ifndef RAFALW_STRING_TOKENS_HPP_
+#define RAFALW_STRING_TOKENS_HPP_
 
 #include <rafalw/generator/Base.hpp>
 #include <string_view>
 
 inline namespace rafalw {
-namespace generator {
 namespace string {
 
-template<typename CharT = char>
-class Tokens : private generator::Base
+template<typename CharT>
+class BasicTokens : private generator::Base
 {
 public:
     using Char = CharT;
     using StringView = std::basic_string_view<Char>;
 
-    Tokens(const StringView& string, const StringView& separators) :
+    BasicTokens(const StringView& string, const StringView& separators) :
         m_stringFull{ string },
         m_separators{ separators }
     {
@@ -64,30 +63,31 @@ private:
         m_string = m_stringFull;
         m_token = {};
         m_count = 0;
-        return RESET_TAG<true>;
+        return generator::RESET_TAG<true>;
     }
 };
 
+using Tokens = BasicTokens<char>;
+
 template<typename Char, typename Sep>
-auto tokens(const Char* str, Sep&& sep) -> Tokens<Char>
+auto tokens(const Char* str, Sep&& sep) -> BasicTokens<Char>
 {
-    return Tokens<Char>{ str, std::forward<Sep>(sep) };
+    return BasicTokens<Char>{ str, std::forward<Sep>(sep) };
 }
 
 template<typename Char, typename Sep>
-auto tokens(const std::basic_string<Char>& str, Sep&& sep) -> Tokens<Char>
+auto tokens(const std::basic_string<Char>& str, Sep&& sep) -> BasicTokens<Char>
 {
-    return Tokens<Char>{ str, std::forward<Sep>(sep) };
+    return BasicTokens<Char>{ str, std::forward<Sep>(sep) };
 }
 
 template<typename Char, typename Sep>
-auto tokens(const std::basic_string_view<Char>& str, Sep&& sep) -> Tokens<Char>
+auto tokens(const std::basic_string_view<Char>& str, Sep&& sep) -> BasicTokens<Char>
 {
-    return Tokens<Char>{ str, std::forward<Sep>(sep) };
+    return BasicTokens<Char>{ str, std::forward<Sep>(sep) };
 }
 
 } // namespace string
-} // namespace generator
 } // namespace rafalw
 
-#endif // RAFALW_GENERATOR_STRING_TOKENS_HPP_
+#endif // RAFALW_STRING_TOKENS_HPP_

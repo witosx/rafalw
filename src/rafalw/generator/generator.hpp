@@ -16,8 +16,8 @@
 #include <rafalw/generator/compound/Enumerate.hpp>
 #include <rafalw/generator/compound/Zip.hpp>
 #include <rafalw/generator/compound/Join.hpp>
-#include <rafalw/generator/stream/Lines.hpp>
-#include <rafalw/generator/stream/Items.hpp>
-#include <rafalw/generator/string/Tokens.hpp>
+#include <rafalw/stream/Lines.hpp>
+#include <rafalw/stream/Items.hpp>
+#include <rafalw/string/Tokens.hpp>
 
 #endif // RAFALW_GENERATOR_GENERATOR_HPP_

@@ -1,15 +1,15 @@
-#ifndef RAFALW_GENERATOR_STREAM_LINES_HPP_
-#define RAFALW_GENERATOR_STREAM_LINES_HPP_
+#ifndef RAFALW_STREAM_LINES_HPP_
+#define RAFALW_STREAM_LINES_HPP_
 
-#include <rafalw/generator/stream/Items.hpp>
+#include <rafalw/stream/Items.hpp>
 #include <rafalw/stream/Line.hpp>
+#include <rafalw/generator/Base.hpp>
 
 inline namespace rafalw {
-namespace generator {
 namespace stream {
 
 template<typename CharT>
-class BasicLines : private Base
+class BasicLines : private generator::Base
 {
 public:
     using Char = CharT;
@@ -26,7 +26,7 @@ public:
 private:
     friend class generator::BaseAccess;
 
-    Items<rafalw::stream::BasicLine<Char>> m_items;
+    Items<BasicLine<Char>> m_items;
 
     auto generatorPeek() const -> decltype(peek(m_items).string())
     {
@@ -59,7 +59,6 @@ auto lines(std::basic_istream<CharT>& stream, const CharT sep) -> BasicLines<Cha
 }
 
 } // namespace stream
-} // namespace generator
 } // namespace rafalw
 
-#endif // RAFALW_GENERATOR_STREAM_LINES_HPP_
+#endif // RAFALW_STREAM_LINES_HPP_

@@ -3,7 +3,7 @@
 
 #include <rafalw/csv/Context.hpp>
 #include <rafalw/csv/ColumnError.hpp>
-#include <rafalw/generator/string/Tokens.hpp>
+#include <rafalw/string/Tokens.hpp>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -61,7 +61,7 @@ public:
     auto parse(StringView line) -> void
     {
         m_columns.clear();
-        for (auto&& token: generator::string::tokens(line, m_delimiters))
+        for (auto&& token: string::tokens(line, m_delimiters))
             if (!token.empty() || keepEmptyTokens())
                 m_columns.push_back(token);
     }

@@ -5,7 +5,7 @@
 #include <rafalw/csv/Row.hpp>
 #include <rafalw/csv/Error.hpp>
 #include <rafalw/generator/Base.hpp>
-#include <rafalw/generator/stream/Lines.hpp>
+#include <rafalw/stream/Lines.hpp>
 #include <string>
 #include <string_view>
 
@@ -44,7 +44,7 @@ private:
     friend class generator::BaseAccess;
 
     Context m_context;
-    generator::stream::BasicLines<Char> m_lines;
+    stream::BasicLines<Char> m_lines;
     Row m_row;
 
     auto generatorDone() const -> bool
@@ -69,7 +69,7 @@ private:
         try {
             return peek(m_lines);
         }
-        catch (const generator::stream::Error&) {
+        catch (const stream::Error&) {
             throw Error{ m_context, "read failed" };
         }
     }
