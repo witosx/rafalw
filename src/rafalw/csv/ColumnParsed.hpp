@@ -2,6 +2,7 @@
 #define RAFALW_CSV_COLUMNPARSED_HPP_
 
 #include <rafalw/csv/Row.hpp>
+#include <rafalw/csv/ColumnSimple.hpp>
 #include <rafalw/csv/ColumnError.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/core/demangle.hpp>
@@ -14,6 +15,10 @@ class ColumnParsedBase
 public:
 	explicit ColumnParsedBase(int index) :
 		m_index{ index }
+	{}
+
+	ColumnParsedBase(const ColumnSimple column) :
+	    ColumnParsedBase{ column.index() }
 	{}
 
     auto index() const -> int

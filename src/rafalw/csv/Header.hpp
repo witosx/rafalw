@@ -106,6 +106,8 @@ private:
     std::unordered_map<std::string_view, Column*> m_map;
 };
 
+using Header = BasicHeader<char>;
+
 template<typename CharT>
 auto header(const BasicRow<CharT>& header) -> BasicHeader<CharT>
 {
