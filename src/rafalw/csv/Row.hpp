@@ -11,28 +11,26 @@
 inline namespace rafalw {
 namespace csv {
 
+enum class empty_fields
+{
+    keep,
+    drop
+};
+
 class BaseRow
 {
 public:
-    enum class EmptyPolicy
-    {
-        KEEP,
-        IGNORE
-    };
-
-    BaseRow(const Context& context, EmptyPolicy policy) :
-        m_context{ context },
-        m_keepEmptyTokens{ policy == EmptyPolicy::KEEP }
-    {}
-
-    BaseRow(const BaseRow&) = delete;
-
     auto context() const -> const Context&
     {
         return m_context;
     }
 
 protected:
+    BaseRow(const Context& context, empty_fields empty) :
+        m_context{ context },
+        m_keepEmptyTokens{ empty == empty_fields::keep }
+    {}
+
     auto keepEmptyTokens() const -> bool
     {
         return m_keepEmptyTokens;
@@ -53,10 +51,12 @@ public:
 
     using Columns = std::vector<StringView>;
 
-    BasicRow(const Context& context, StringView delimiters, EmptyPolicy policy) :
-        BaseRow{ context, policy },
+    BasicRow(const Context& context, StringView delimiters, empty_fields keep_empty) :
+        BaseRow{ context, keep_empty },
         m_delimiters{ delimiters }
     {}
+
+    BasicRow(const BasicRow&) = delete;
 
     auto parse(StringView line) -> void
     {

@@ -21,9 +21,9 @@ public:
     using StringView = typename StreamReader::StringView;
     using Row = typename StreamReader::Row;
 
-    BasicFileReader(std::string_view path, StringView row_delimiters, BaseRow::EmptyPolicy row_policy = BaseRow::EmptyPolicy::KEEP) :
+    BasicFileReader(std::string_view path, StringView row_delimiters, empty_fields row_keep_empty = empty_fields::keep) :
         m_stream{ path.data() },
-        m_streamReader{ m_stream, path, row_delimiters, row_policy }
+        m_streamReader{ m_stream, path, row_delimiters, row_keep_empty }
     {}
 
 private:
@@ -51,9 +51,9 @@ private:
 using FileReader = BasicFileReader<std::basic_ifstream<char>>;
 
 template<typename StreamT = std::basic_ifstream<char>>
-inline auto reader(std::string_view path, typename BasicFileReader<StreamT>::StringView row_delimiters, BaseRow::EmptyPolicy row_policy = BaseRow::EmptyPolicy::KEEP) -> BasicFileReader<StreamT>
+inline auto reader(std::string_view path, typename BasicFileReader<StreamT>::StringView row_delimiters, empty_fields row_keep_empty = empty_fields::keep) -> BasicFileReader<StreamT>
 {
-    return BasicFileReader<StreamT>{ path, row_delimiters, row_policy };
+    return BasicFileReader<StreamT>{ path, row_delimiters, row_keep_empty };
 }
 
 } // namespace csv

@@ -2,8 +2,7 @@
 #define RAFALW_CSV_HEADER_HPP_
 
 #include <rafalw/csv/StreamReader.hpp>
-#include <rafalw/csv/ColumnParsed.hpp>
-#include <rafalw/csv/ColumnSimple.hpp>
+#include <rafalw/csv/Row.hpp>
 #include <rafalw/csv/Error.hpp>
 #include <rafalw/utils/ScopeGuard.hpp>
 #include <boost/container/small_vector.hpp>
@@ -124,16 +123,10 @@ auto header(ReaderT& reader) -> decltype(header(peek(reader)))
     return header(peek(reader));
 }
 
-template<typename CharT>
-auto column(const BasicHeader<CharT>& header, typename BasicHeader<CharT>::StringView column_name) -> decltype(column(header.column(column_name).index()))
+template<typename CharT, typename... Args>
+auto column(const BasicHeader<CharT>& header, typename BasicHeader<CharT>::StringView column_name, Args... args) -> decltype(column(header.column(column_name).index(), std::move(args)...))
 {
-    return column(header.column(column_name).index());
-}
-
-template<typename CharT, typename ValueT, bool OPTIONAL_V>
-auto column(const BasicHeader<CharT>& header, typename BasicHeader<CharT>::StringView column_name, ColumnParsedTag<ValueT, OPTIONAL_V> tag) -> decltype(column(header.column(column_name).index(), tag))
-{
-    return column(header.column(column_name).index(), tag);
+    return column(header.column(column_name).index(), std::move(args)...);
 }
 
 template<typename CharT>

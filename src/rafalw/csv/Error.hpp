@@ -7,12 +7,21 @@
 inline namespace rafalw {
 namespace csv {
 
-class Error : public utils::Error
+class BaseError : public utils::Error
+{
+public:
+    template<typename... Args>
+    explicit BaseError(const Args&... args) :
+        utils::Error{ args... }
+    {}
+};
+
+class Error : public BaseError
 {
 public:
     template<typename... Args>
     Error(const Context& context, const Args&... args) :
-        utils::Error{ "csv source ", context.source, " row ", context.line, " ", args..., },
+        BaseError{ "csv source ", context.source, " row ", context.line, " ", args..., },
         m_context{ context }
     {}
 

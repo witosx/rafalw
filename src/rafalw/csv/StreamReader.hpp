@@ -23,16 +23,16 @@ public:
 
     using Row = BasicRow<CharT>;
 
-    BasicStreamReader(Stream& stream, std::string_view source_name, StringView row_delimiters, BaseRow::EmptyPolicy row_policy = BaseRow::EmptyPolicy::KEEP) :
+    BasicStreamReader(Stream& stream, std::string_view source_name, StringView row_delimiters, empty_fields row_keep_empty = empty_fields::keep) :
         m_context{ source_name },
         m_lines{ stream },
-        m_row{ m_context, row_delimiters, row_policy }
+        m_row{ m_context, row_delimiters, row_keep_empty }
     {
         processCurrentLine();
     }
 
-    BasicStreamReader(Stream& stream, StringView row_delimiters, BaseRow::EmptyPolicy row_policy = BaseRow::EmptyPolicy::KEEP) :
-        BasicStreamReader{ stream, "<unnamed-stream>", row_delimiters, row_policy }
+    BasicStreamReader(Stream& stream, StringView row_delimiters, empty_fields row_keep_empty = empty_fields::keep) :
+        BasicStreamReader{ stream, "<unnamed-stream>", row_delimiters, row_keep_empty }
     {}
 
     auto context() const -> const Context&
@@ -86,15 +86,15 @@ private:
 using StreamReader = BasicStreamReader<char>;
 
 template<typename CharT>
-auto reader(std::basic_istream<CharT>& stream, typename BasicStreamReader<CharT>::StringView row_delimiters, BaseRow::EmptyPolicy row_policy = BaseRow::EmptyPolicy::KEEP) -> BasicStreamReader<CharT>
+auto reader(std::basic_istream<CharT>& stream, typename BasicStreamReader<CharT>::StringView row_delimiters, empty_fields row_keep_empty = empty_fields::keep) -> BasicStreamReader<CharT>
 {
-    return BasicStreamReader<CharT>{ stream, row_delimiters, row_policy };
+    return BasicStreamReader<CharT>{ stream, row_delimiters, row_keep_empty };
 }
 
 template<typename CharT>
-auto reader(std::basic_istream<CharT>& stream, std::string_view source_name, typename BasicStreamReader<CharT>::StringView row_delimiters, BaseRow::EmptyPolicy row_policy = BaseRow::EmptyPolicy::KEEP) -> BasicStreamReader<CharT>
+auto reader(std::basic_istream<CharT>& stream, std::string_view source_name, typename BasicStreamReader<CharT>::StringView row_delimiters, empty_fields row_keep_empty = empty_fields::keep) -> BasicStreamReader<CharT>
 {
-    return BasicStreamReader<CharT>{ stream, source_name, row_delimiters, row_policy };
+    return BasicStreamReader<CharT>{ stream, source_name, row_delimiters, row_keep_empty };
 }
 
 } // namespace csv
