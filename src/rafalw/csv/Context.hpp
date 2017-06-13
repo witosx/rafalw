@@ -1,7 +1,8 @@
 #ifndef RAFALW_CSV_CONTEXT_HPP_
 #define RAFALW_CSV_CONTEXT_HPP_
 
-#include <sstream>
+#include <string>
+#include <string_view>
 
 inline namespace rafalw {
 namespace csv {
