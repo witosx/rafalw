@@ -4,6 +4,7 @@
 #include <rafalw/csv/Row.hpp>
 #include <rafalw/csv/ColumnSimple.hpp>
 #include <rafalw/csv/ColumnError.hpp>
+#include <rafalw/utils/helpers.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/core/demangle.hpp>
 
@@ -30,18 +31,54 @@ private:
     int m_index;
 };
 
-template<typename ValueT, bool OPTIONAL_V>
+class ParserError : public BaseError
+{
+public:
+    template<typename ValueT>
+    ParserError(const std::string_view& str, utils::Type<ValueT>) :
+        BaseError{ "parser error - string '", str, "' can't be converted to ", boost::core::demangle(typeid(ValueT).name()) }
+    {}
+};
+
+template<typename ValueT>
+struct LexicalCastParser
+{
+    auto operator ()(const std::string_view& str) const -> ValueT
+    {
+        try {
+            return boost::lexical_cast<ValueT>(str);
+        }
+        catch (const boost::bad_lexical_cast&) {
+            throw ParserError{ str, utils::type<ValueT> };
+        }
+    }
+};
+
+template<typename ValueT>
+using DefaultParser = LexicalCastParser<ValueT>;
+
+template<typename ValueT, typename ParserT, bool OPTIONAL_V>
 class ColumnParsedBasic : public ColumnParsedBase
 {
 public:
 	using ColumnParsedBase::ColumnParsedBase;
+	using Value = ValueT;
+	using Parser = ParserT;
+
+	auto parser() const -> const Parser&
+    {
+	    return m_parser;
+    }
+
+private:
+	Parser m_parser;
 };
 
 template<typename ValueT>
-using ColumnParsed = ColumnParsedBasic<ValueT, false>;
+using ColumnParsed = ColumnParsedBasic<ValueT, DefaultParser<ValueT>, false>;
 
 template<typename ValueT>
-using ColumnParsedOptional = ColumnParsedBasic<ValueT, true>;
+using ColumnParsedOptional = ColumnParsedBasic<ValueT, DefaultParser<ValueT>, true>;
 
 template<typename ValueT, bool OPTIONAL_V>
 struct ColumnParsedTag {};
@@ -53,13 +90,13 @@ template<typename ValueT>
 static constexpr auto as_optional = ColumnParsedTag<ValueT, true>{};
 
 template<typename ValueT, bool OPTIONAL_V>
-inline auto column(int index, ColumnParsedTag<ValueT, OPTIONAL_V>) -> ColumnParsedBasic<ValueT, OPTIONAL_V>
+inline auto column(int index, ColumnParsedTag<ValueT, OPTIONAL_V>) -> ColumnParsedBasic<ValueT, DefaultParser<ValueT>, OPTIONAL_V>
 {
-    return ColumnParsedBasic<ValueT, OPTIONAL_V>{ index };
+    return ColumnParsedBasic<ValueT, DefaultParser<ValueT>, OPTIONAL_V>{ index };
 }
 
-template<typename CharT, typename ValueT, bool OPTIONAL_V>
-auto fetch(const BasicRow<CharT>& row, const ColumnParsedBasic<ValueT, OPTIONAL_V> column) -> std::conditional_t<OPTIONAL_V, std::optional<ValueT>, ValueT>
+template<typename CharT, typename ValueT, typename ParserT, bool OPTIONAL_V>
+auto fetch(const BasicRow<CharT>& row, const ColumnParsedBasic<ValueT, ParserT, OPTIONAL_V>& column) -> std::conditional_t<OPTIONAL_V, std::optional<ValueT>, ValueT>
 {
     const auto str = fetch(row, column.index());
 
@@ -70,9 +107,9 @@ auto fetch(const BasicRow<CharT>& row, const ColumnParsedBasic<ValueT, OPTIONAL_
     }
 
     try {
-        return boost::lexical_cast<ValueT>(str);
-    } catch (const boost::bad_lexical_cast&) {
-        throw ColumnError{ row.context(), column.index(), "string '", str, "' can't be converted to ", boost::core::demangle(typeid(ValueT).name()) };
+        return column.parser()(str);
+    } catch (const ParserError& e) {
+        throw ColumnError{ row.context(), column.index(), e.what() };
     }
 }
 
