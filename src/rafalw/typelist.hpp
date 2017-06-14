@@ -78,14 +78,11 @@ namespace detail {
     template<bool empty, typename... Ls>
     struct Zip;
 
-    template<typename L, typename F>
-    auto do_apply(F&& f, std::true_type) -> void;
-
-    template<typename L, typename F>
-    auto do_apply(F&& f, std::false_type) -> void;
-
     template<typename L1, typename L2>
     using concat2 = result<Concat2<L1, L2>>;
+
+    template<typename L>
+    struct Apply;
 
 } // namespace detail
 
@@ -170,8 +167,9 @@ constexpr auto count = length<filter<L, detail::Bind<std::is_same, E>::template 
 template<typename L, typename F>
 auto apply(F&& f) -> void
 {
-    detail::do_apply<L>(std::forward<F>(f), std::integral_constant<bool, !isempty<L>>{});
+    detail::Apply<L>::apply(std::forward<F>(f));
 }
+
 
 namespace detail {
 
@@ -317,15 +315,18 @@ namespace detail {
         using Result = concat<List<List<head<Ls>...>>, zip<tail<Ls>...>>;
     };
 
-    template<typename L, typename F>
-    auto do_apply(F&& f, std::true_type) -> void
-    {
-        f(utils::type<head<L>>);
-        apply<tail<L>>(std::forward<F>(f));
-    }
+    template<typename L>
+    struct Apply;
 
-    template<typename L, typename F>
-    auto do_apply(F&&, std::false_type) -> void {}
+    template<typename... Elements>
+    struct Apply<List<Elements...>>
+    {
+        template<typename F>
+        static auto apply(F&& f) -> void
+        {
+            (f(utils::type<Elements>), ...);
+        }
+    };
 
 } // namespace detail
 
