@@ -159,7 +159,7 @@ template<typename... Ls>
 using zip = detail::result<detail::Zip<detail::any<isempty<Ls>...>, Ls...>>;
 
 template<typename L, typename E>
-constexpr auto contains = !std::is_same<find<L, E>, NotFound>::value;
+constexpr auto contains = !std::is_same_v<find<L, E>, NotFound>;
 
 template<typename L, typename E>
 constexpr auto count = length<filter<L, detail::Bind<std::is_same, E>::template function>>;
@@ -324,7 +324,7 @@ namespace detail {
         template<typename F>
         static auto apply(F&& f) -> void
         {
-            (f(utils::type<Elements>), ...);
+            (f(utils::wrap<Elements>()), ...);
         }
     };
 

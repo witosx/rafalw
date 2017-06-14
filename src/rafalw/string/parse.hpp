@@ -14,7 +14,7 @@ class ParseError : public utils::Error
 {
 public:
     template<typename T>
-    ParseError(const std::string_view& str, utils::Type<T>) :
+    ParseError(const std::string_view& str, utils::WrappedType<T>) :
         Error{ "can't parse '", str, "' as ", utils::demangle<T>() }
     {}
 };
@@ -25,7 +25,7 @@ auto parse(const std::string_view& str) -> T
     try {
         return boost::lexical_cast<T>(str.data(), str.length());
     } catch (const boost::bad_lexical_cast&) {
-        throw ParseError{ str, utils::Type<T>{} };
+        throw ParseError{ str, utils::WrappedType<T>{} };
     }
 }
 

@@ -45,7 +45,7 @@ private:
 
     auto generatorReset()
     {
-        static constexpr auto OK = std::conjunction<reset_tag<GeneratorsT>...>::value;
+        static constexpr auto OK = std::conjunction_v<reset_tag<GeneratorsT>...>;
 
         if (OK)
         {

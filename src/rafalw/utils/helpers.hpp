@@ -31,17 +31,31 @@ struct Ignore
     }
 };
 
+
 template<typename T>
-struct Type
+struct WrappedType
 {
-    using WrappedType = T;
+    using type = T;
 };
 
 template<typename T>
-static constexpr auto type = Type<T>{};
+constexpr auto wrap() -> WrappedType<T>
+{
+    return WrappedType<T>{};
+}
 
-template<typename T>
-using type_extract = typename T::WrappedType;
+
+template<auto V>
+struct WrappedValue
+{
+    static constexpr auto value = V;
+};
+
+template<auto V>
+constexpr auto wrap() -> WrappedValue<V>
+{
+    return WrappedValue<V>{};
+}
 
 
 template<typename T>
