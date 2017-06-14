@@ -14,25 +14,13 @@ namespace typelist {
 namespace detail {
 
     template<bool... Args>
-    struct AnyOp;
-
-    template<>
-    struct AnyOp<> : public std::integral_constant<bool, false> {};
-
-    template<bool Arg, bool... Args>
-    struct AnyOp<Arg, Args...> : public std::integral_constant<bool, Arg || AnyOp<Args...>::value> {};
-
-    template<bool... Args>
-    constexpr auto any = AnyOp<Args...>::value;
-
-    template<typename B>
-    struct Negate : public std::integral_constant<bool, !B::value> {};
+    constexpr auto any = std::disjunction_v<std::bool_constant<Args>...>;
 
     template<template<typename...> class F>
     struct Not
     {
         template<typename... T>
-        using Result = Negate<F<T...>>;
+        using Result = typename std::negation<F<T...>>::type;
     };
 
     template<template<typename...> class T, typename Arg>
@@ -163,7 +151,7 @@ template<typename L, std::size_t N>
 using drop = detail::result<detail::Drop<L, N>>;
 
 template<typename L, std::size_t N>
-using take = reverse<drop<reverse<L>, length<L> - N>>;
+using take = reverse<drop<reverse<L>, (length<L>) - N>>;
 
 template<typename L, std::size_t I>
 using get = head<drop<L, I>>;

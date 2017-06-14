@@ -18,6 +18,8 @@ struct Invoke
 
 struct Ignore
 {
+    constexpr Ignore() = default;
+
     template<typename T>
     constexpr Ignore(const T&)
     {}
@@ -32,11 +34,15 @@ struct Ignore
 template<typename T>
 struct Type
 {
-    using type = T;
+    using WrappedType = T;
 };
 
 template<typename T>
 static constexpr auto type = Type<T>{};
+
+template<typename T>
+using type_extract = typename T::WrappedType;
+
 
 template<typename T>
 using identity = T;
