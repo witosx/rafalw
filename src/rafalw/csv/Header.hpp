@@ -2,8 +2,8 @@
 #define RAFALW_CSV_HEADER_HPP_
 
 #include <rafalw/csv/StreamReader.hpp>
+#include <rafalw/csv/SourceError.hpp>
 #include <rafalw/csv/Row.hpp>
-#include <rafalw/csv/Error.hpp>
 #include <rafalw/utils/ScopeGuard.hpp>
 #include <boost/container/small_vector.hpp>
 #include <unordered_map>
@@ -14,14 +14,6 @@ namespace csv {
 class BaseHeader
 {
 public:
-    class UnknownColumnError : public Error
-    {
-    public:
-        UnknownColumnError(const Context& context, const std::string_view& name) :
-            Error{ context, "unknown column '", name, "'" }
-        {}
-    };
-
     explicit BaseHeader(const Context& context) :
         m_context{ context }
     {}
@@ -63,6 +55,14 @@ private:
 	String m_name;
 };
 
+class HeaderColumnNotFoundError : public SourceError
+{
+public:
+	HeaderColumnNotFoundError(const Context& context, const std::string_view& name) :
+    	SourceError{ context, "header column '", name, "' not found" }
+    {}
+};
+
 template<typename CharT>
 class BasicHeader : public BaseHeader
 {
@@ -91,7 +91,7 @@ public:
         try {
             return *m_map.at(name);
         } catch (const std::out_of_range&) {
-            throw UnknownColumnError{ context(), name };
+            throw HeaderColumnNotFoundError{ context(), name };
         }
     }
 
@@ -102,7 +102,7 @@ public:
 
 private:
     Columns m_data;
-    std::unordered_map<std::string_view, Column*> m_map;
+    std::unordered_map<StringView, Column*> m_map;
 };
 
 using Header = BasicHeader<char>;

@@ -3,7 +3,7 @@
 
 #include <rafalw/csv/Context.hpp>
 #include <rafalw/csv/Row.hpp>
-#include <rafalw/csv/Error.hpp>
+#include <rafalw/csv/SourceError.hpp>
 #include <rafalw/generator/Base.hpp>
 #include <rafalw/stream/Lines.hpp>
 #include <string>
@@ -70,7 +70,7 @@ private:
             return peek(m_lines);
         }
         catch (const stream::Error&) {
-            throw Error{ m_context, "read failed" };
+            throw SourceError{ m_context, "read failed" };
         }
     }
 

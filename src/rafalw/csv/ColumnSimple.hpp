@@ -1,8 +1,8 @@
 #ifndef RAFALW_CSV_COLUMNSIMPLE_HPP_
 #define RAFALW_CSV_COLUMNSIMPLE_HPP_
 
-#include <rafalw/csv/Row.hpp>
 #include <rafalw/csv/ColumnError.hpp>
+#include <rafalw/csv/Row.hpp>
 
 inline namespace rafalw {
 namespace csv {

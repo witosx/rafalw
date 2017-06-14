@@ -1,8 +1,8 @@
 #ifndef RAFALW_CSV_ROW_HPP_
 #define RAFALW_CSV_ROW_HPP_
 
-#include <rafalw/csv/Context.hpp>
 #include <rafalw/csv/ColumnError.hpp>
+#include <rafalw/csv/Context.hpp>
 #include <rafalw/string/Tokens.hpp>
 #include <string>
 #include <string_view>

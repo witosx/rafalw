@@ -4,9 +4,8 @@
 #include <rafalw/csv/Row.hpp>
 #include <rafalw/csv/ColumnSimple.hpp>
 #include <rafalw/csv/ColumnError.hpp>
-#include <rafalw/utils/helpers.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/core/demangle.hpp>
+#include <rafalw/csv/ColumnParseError.hpp>
+#include <rafalw/csv/LexicalCastParser.hpp>
 
 inline namespace rafalw {
 namespace csv {
@@ -29,29 +28,6 @@ public:
 
 private:
     int m_index;
-};
-
-class ParserError : public BaseError
-{
-public:
-    template<typename ValueT>
-    ParserError(const std::string_view& str, utils::Type<ValueT>) :
-        BaseError{ "parser error - string '", str, "' can't be converted to ", boost::core::demangle(typeid(ValueT).name()) }
-    {}
-};
-
-template<typename ValueT>
-struct LexicalCastParser
-{
-    auto operator ()(const std::string_view& str) const -> ValueT
-    {
-        try {
-            return boost::lexical_cast<ValueT>(str);
-        }
-        catch (const boost::bad_lexical_cast&) {
-            throw ParserError{ str, utils::type<ValueT> };
-        }
-    }
 };
 
 template<typename ValueT>
@@ -108,8 +84,8 @@ auto fetch(const BasicRow<CharT>& row, const ColumnParsedBasic<ValueT, ParserT, 
 
     try {
         return column.parser()(str);
-    } catch (const ParserError& e) {
-        throw ColumnError{ row.context(), column.index(), e.what() };
+    } catch (const std::exception& e) {
+        throw ColumnParseError<ValueT>{ row.context(), column.index(), str, e.what() };
     }
 }
 
