@@ -16,20 +16,19 @@ namespace detail {
     template<bool... Args>
     constexpr auto any = std::disjunction_v<std::bool_constant<Args>...>;
 
-    template<template<typename...> class F>
-    struct Not
+    template<template<typename> class Unary>
+    struct Negate
     {
-        template<typename... T>
-        using Result = typename std::negation<F<T...>>::type;
+        template<typename Arg1>
+        using function = typename std::negation<Unary<Arg1>>::type;
     };
 
-    template<template<typename...> class T, typename Arg>
+    template<template<typename, typename> class Binary, typename Arg1>
     struct Bind
     {
-        template<typename... Args>
-        using Result = T<Arg, Args...>;
+        template<typename Arg2>
+        using function = Binary<Arg1, Arg2>;
     };
-
 
     template<typename Op>
     using result = typename Op::Result;
@@ -67,7 +66,7 @@ namespace detail {
     template<typename L, typename Element, std::size_t I>
     struct Find;
 
-    template<typename L, template<typename...> class F>
+    template<typename L, template<typename> class F>
     struct Filter;
 
     template<typename L>
@@ -138,11 +137,11 @@ using reverse = detail::result<detail::Reverse<L>>;
 template<typename L, typename E, std::size_t I = 0>
 using find = detail::result<detail::Find<L, E, I>>;
 
-template<typename L, template<typename...> class F>
+template<typename L, template<typename> class F>
 using filter = detail::result<detail::Filter<L, F>>;
 
 template<typename L, typename E>
-using remove = filter<L, detail::Bind<detail::Not<std::is_same>::template Result, E>::template Result>;
+using remove = filter<L, detail::Negate<detail::Bind<std::is_same, E>::template function>::template function>;
 
 template<typename L>
 using unique = detail::result<detail::Unique<L>>;
@@ -166,7 +165,7 @@ template<typename L, typename E>
 constexpr auto contains = !std::is_same<find<L, E>, NotFound>::value;
 
 template<typename L, typename E>
-constexpr auto count = length<filter<L, detail::Bind<std::is_same, E>::template Result>>;
+constexpr auto count = length<filter<L, detail::Bind<std::is_same, E>::template function>>;
 
 template<typename L, typename F>
 auto apply(F&& f) -> void
@@ -269,14 +268,14 @@ namespace detail {
         using Result = NotFound;
     };
 
-    template<typename L, template<typename...> class F>
+    template<typename L, template<typename> class F>
     struct Filter
     {
         using H = head<L>;
         using Result = concat<std::conditional_t<F<H>::value, List<H>, empty>, filter<tail<L>, F>>;
     };
 
-    template<template<typename...> class F>
+    template<template<typename> class F>
     struct Filter<empty, F>
     {
         using Result = empty;
