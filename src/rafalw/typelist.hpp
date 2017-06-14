@@ -1,7 +1,6 @@
 #ifndef RAFALW_TYPELIST_HPP_
 #define RAFALW_TYPELIST_HPP_
 
-#include <rafalw/templates/compose.hpp>
 #include <rafalw/utils/helpers.hpp>
 #include <type_traits>
 #include <typeindex>
@@ -51,7 +50,7 @@ namespace detail {
     template<typename L, typename Element>
     struct Prepend;
 
-    template<typename L, template<typename> class... F>
+    template<typename L, template<typename> class F>
     struct Map;
 
     template<typename L, template<typename, typename> class F>
@@ -119,8 +118,8 @@ using append = detail::result<detail::Append<L, E>>;
 template<typename L, typename E>
 using prepend = detail::result<detail::Prepend<L, E>>;
 
-template<typename L, template<typename> class... F>
-using map = detail::result<detail::Map<L, F...>>;
+template<typename L, template<typename> class F>
+using map = detail::result<detail::Map<L, F>>;
 
 template<typename L, template<typename, typename> class F>
 using reduce = detail::result<detail::Reduce<L, F>>;
@@ -206,16 +205,10 @@ namespace detail {
         using Result = List<Element, Elements...>;
     };
 
-    template<typename L, template<typename> class... F>
-    struct Map
+    template<typename... Elements, template<typename> class F>
+    struct Map<List<Elements...>, F>
     {
-        using Result = prepend<map<tail<L>, F...>, templates::compose<head<L>, F...>>;
-    };
-
-    template<template<typename> class... F>
-    struct Map<empty, F...>
-    {
-        using Result = empty;
+        using Result = List<F<Elements>...>;
     };
 
     template<typename E1, typename E2, typename... E, template<typename, typename> class F>
@@ -314,9 +307,6 @@ namespace detail {
     {
         using Result = concat<List<List<head<Ls>...>>, zip<tail<Ls>...>>;
     };
-
-    template<typename L>
-    struct Apply;
 
     template<typename... Elements>
     struct Apply<List<Elements...>>
