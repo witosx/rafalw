@@ -3,6 +3,7 @@
 
 #include <rafalw/units.hpp>
 #include <type_traits>
+#include <functional>
 
 inline namespace rafalw {
 namespace value {
@@ -138,7 +139,7 @@ struct hash<rafalw::value::Value<U, Q>>
 {
     constexpr auto operator()(const rafalw::value::Value<U, Q> v) const noexcept -> std::size_t
     {
-        return hash<Q>{}(quantity(v));
+        return std::hash<Q>{}(quantity(v));
     }
 };
 

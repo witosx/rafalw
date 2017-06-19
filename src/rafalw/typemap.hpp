@@ -74,13 +74,13 @@ using set = detail::result<detail::Set<M, K, V>>;
 
 
 template<typename M>
-constexpr auto size = typelist::length<items<M>>;
+constexpr auto size = typelist::length_v<items<M>>;
 
 template<typename M>
-constexpr auto isempty = typelist::isempty<items<M>>;
+constexpr auto isempty = typelist::is_empty_v<items<M>>;
 
 template<typename M, typename K>
-constexpr auto contains = typelist::contains<keys<M>, K>;
+constexpr auto contains = typelist::contains_v<keys<M>, K>;
 
 
 
