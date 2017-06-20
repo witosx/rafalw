@@ -5,7 +5,7 @@
 #include <rafalw/csv/ColumnSimple.hpp>
 #include <rafalw/csv/ColumnError.hpp>
 #include <rafalw/csv/ColumnParseError.hpp>
-#include <rafalw/csv/LexicalCastParser.hpp>
+#include <rafalw/csv/DefaultParser.hpp>
 
 inline namespace rafalw {
 namespace csv {
@@ -29,9 +29,6 @@ public:
 private:
     int m_index;
 };
-
-template<typename ValueT>
-using DefaultParser = LexicalCastParser<ValueT>;
 
 template<typename ValueT, typename ParserT, bool OPTIONAL_V>
 class ColumnParsedBasic : public ColumnParsedBase
