@@ -31,6 +31,7 @@ struct Ignore
     }
 };
 
+inline constexpr auto ignore = Ignore{};
 
 template<typename T>
 struct WrappedType

@@ -1,7 +1,6 @@
 #ifndef RAFALW_CSV_HEADER_HPP_
 #define RAFALW_CSV_HEADER_HPP_
 
-#include <rafalw/csv/StreamReader.hpp>
 #include <rafalw/csv/SourceError.hpp>
 #include <rafalw/csv/Row.hpp>
 #include <rafalw/utils/ScopeGuard.hpp>

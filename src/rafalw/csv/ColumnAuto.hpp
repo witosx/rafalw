@@ -37,8 +37,9 @@ class ColumnAutoProxy
 public:
     using Char = CharT;
     using StringView = std::basic_string_view<CharT>;
+    using Row = BasicRow<CharT>;
 
-    ColumnAutoProxy(const BasicRow<CharT>& row, const ColumnAuto column) :
+    ColumnAutoProxy(const Row& row, const ColumnAuto column) :
         m_row{ row },
         m_column{ column }
     {}
@@ -66,7 +67,7 @@ public:
     }
 
 private:
-    const BasicRow<CharT>& m_row;
+    const Row& m_row;
     ColumnAuto m_column;
 
     template<typename T>
