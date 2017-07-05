@@ -1,7 +1,6 @@
 #ifndef RAFALW_UTILS_ERROR_HPP_
 #define RAFALW_UTILS_ERROR_HPP_
 
-#include <rafalw/utils/static.hpp>
 #include <exception>
 #include <string>
 #include <sstream>
@@ -13,7 +12,7 @@ class Error : public std::exception
 {
 public:
     template<typename... Args>
-    Error(const Args&... args) :
+    explicit Error(const Args&... args) :
         m_message{ createMessage(args...) }
     {}
 
@@ -29,11 +28,7 @@ private:
     static auto createMessage(const Args&... args) -> std::string
     {
         auto ss = std::ostringstream{};
-
-        static_foreach(std::forward_as_tuple(args...), [&ss](const auto& e){
-            ss << e;
-        });
-
+        (ss << ... << args);
         return ss.str();
     }
 };
