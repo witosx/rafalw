@@ -8,18 +8,12 @@ inline namespace rafalw {
 namespace enums {
 
     template<typename T>
-    struct EnableBitwiseOperatorsFor;
+    struct enable_for;
 
     namespace detail {
 
-        template<typename T, typename = std::void_t<>>
-        struct Enabled : public std::false_type {};
-
         template<typename T>
-        struct Enabled<T, std::void_t<decltype(EnableBitwiseOperatorsFor<T>{})>> : public std::true_type {};
-
-        template<typename T>
-        using enabler = std::enable_if_t<std::is_enum_v<T> && Enabled<T>::value>*;
+        using enabler = std::enable_if_t<std::is_enum_v<T> && std::is_default_constructible_v<enable_for<T>>>*;
 
         template<typename OpT, typename EnumT>
         constexpr auto op(EnumT e1, EnumT e2) noexcept -> EnumT
